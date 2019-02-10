@@ -14,6 +14,45 @@
 
 ​	nodejs 是单线程，单进程。Node 处理请求时是单线程，但是在后台拥有一个 I / O 线程池。
 
+##### 主线程
+
+宏任务：主体script, setTimeout, setInterval, new Promise()
+
+微任务：Promise.then, process.nextTick
+
+开定时器是 同步的，定时器的任务（即定时器要做的事情）是异步的。
+
+```javascript
+/* 情况一： */
+let d = 3;
+var c = setInterval(show(), 10000);
+
+function show() {
+    console.log('hha');
+    console.log(d);
+    function a() {
+        clearInterval(c);
+        console.log('hi');
+    };
+    return a;
+}
+
+
+/* 情况二： */
+let d = 3;
+let c = setInterval(show, 10000);
+
+function show() {
+    console.log('hha');
+    clearInterval(c);
+    function a() {
+        console.log('hi');
+    };
+    a();
+    return a;
+}
+```
+
 ##### I / O
 
 * input 输入
@@ -31,6 +70,12 @@
 2. 实时多人游戏。
 3. 后端的 Web 服务，例如跨域，服务器端的请求。
 4. 多客户端的通信，如：即时通信。
+
+## Node 开发方向
+
+- GUI：Graphical User Interface 图形用户界面 office, vscode, 浏览器, 播放器...
+- CLI：Command-Line Interface 命令行界面，也称 CUI,字符用户界面。虽然没有 GUI 操作直观，但是 CLI 更加节省计算机资源（所以一般用于服务器环境） babel, tsc, webpack, vue-cli
+- Server 服务提供(Web Server, IM...)
 
 ## 模块化
 
@@ -217,9 +262,109 @@ init();
 
 链式流：输出流.pipe(输入流).pipe(输入流)
 
+## 网络
 
+##### IP (Internet Protocol) 网络协议
 
+​	所谓协议就是一套规则，而 IP 协议就是为了能够让计算机互连的一种规则，为了标识每台连入网络中的计算机（网卡）的唯一性，每个连入网络的网卡都会绑定一个 IP 地址（固定 - 买断、临时分配）
 
+##### IP 分配使用
+
+ * IP 地址的使用是有一定规则和规划的。
+* 127.0.0.1： 本地回环网络地址（其实就是自己 CALL 自己的一个快捷方式）
+* (192.168.0.1 - 192.168.255.254 / 172.16.0.1 - 172.31.255.254 / 10.0.0.1 - 10.255.255.254) 局域网络（局域网）使用
+* 其他
+
+##### 端口
+
+发送数据的端口由系统分配
+
+一个应用程序可以同时监听多个网卡的多个端口
+
+一个端口只能同时被一个程序监听
+
+如果一个程序尝试监听一个已经被其他程序监听的端口，就会报端口占用的错误。
+
+##### 数据传输协议
+
+1. TCP
+   * 可靠的、面向连接的协议、传输效率低
+   * 效率要求相对低，但对准确性要求相对高的场景
+   * 文件传输、接受邮件、远程登录
+2. UDP
+   * 不可靠的、无连接的服务、传输效率高
+   * 效率要求相对高，对准确性要求相对低的场景
+   * 在线视频、网络语音电话
+
+##### dgram (数据报)
+
+​	dgram 模块提供了 UDP 数据包 socket 的实现。socket 又称“套接字”，应用程序通常通过“套接字”向网络发出请求或者应答网络请求，其本质上就是一套用于实现网络数据交换的接口(API)。
+
+```javascript
+const dgram = require('dgram');
+```
+
+##### Net 模块 (TCP)
+
+net 模块提供了创建基于流的 TCP 或 IPC 服务器 (net.createServer()) 和客户端 (net.createConnection()) 的异步网络 API
+
+```javascript
+const net = require('net');
+```
+
+使用：
+
+* 服务端： 提供服务，被连接，被请求的一方
+* 客户端： 获取服务，发起连接，请求的一方
+
+##### HTTP
+
+HTTP 的结构： HTTP 是一个基于 TCP / IP 通信协议来传输（超文本）数据
+
+HTTP 是基于 TCP / IP 协议来定位传输数据
+
+同时在 TCP / IP 包基础上对要传输的数据进行再次包装
+
+HTTP 是单向单链接、无状态协议
+
+HTTP: 传输 ht(超文本) 这样的文本的规则：
+
+* 规定了请求发送的数据格式
+  * Request Line: 请求行
+  * Request header: 请求头
+  * Request body: 请求正文
+* 规定了返回的数据的格式
+  * Response Line: 响应行
+  * Response header: 响应头
+  * Response body: 响应正文
+* 传输的规则
+
+##### HTTP 状态码分类：
+
+​	HTTP/1.1 中定义了 5 类状态码，状态码由三位数字组成，第一个数字定义了响应的类别。
+
+* 1 XX 提示信息 - 表示请求已被成功接收，继续处理没有特殊含义。
+* 2 XX 成功 - 表示请求已被成功接收，理解，接受。
+  * 200 成功
+* 3 XX 重定向 - 表示完成请求必须进行更进一步的处理。
+  * 301 永久重定向
+  * 302 临时重定向
+  * 304 使用缓存（服务器没有更新过）
+* 4 XX 客户端错误 - 请求有语法错误或请求无法实现。
+  * 400 请求语义有误
+  * 401 当前请求需要用户验证
+  * 403 权限不足，无法访问
+  * 404 资源找不到
+* 5 XX 服务器端错误 - 服务器未能实现合法的请求。
+  * 500 服务器端代码有错误
+  * 502 网关错误
+  * 503 服务器已奔溃
+
+##### URL
+
+Uniform Resource Locator: 统一资源定位符，是对可以从互联网上得到的资源的位置和访问方法的一种简洁的表示，是互联网上标准资源的地址。
+
+格式： protocol://hostname[:port]/path/[?query]#fragment
 
 
 
