@@ -1195,6 +1195,20 @@ Error.name 的六种值对应的信息：
 5. TypeError：操作数据类型错误
 6. URIError：URI处理函数使用不当
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ## ES6
 
 #### Symbol
@@ -1458,17 +1472,4 @@ Promise.resolve()
 * Promise.race([p1, p2]) 只要有一个成功就执行 then 方法
 
 
-
-
-
-
-
-
-
-
-
-```javascript
-let a = 10;
-console.log(a);
-```
 
