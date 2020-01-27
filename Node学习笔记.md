@@ -77,6 +77,72 @@ function show() {
 - CLI：Command-Line Interface 命令行界面，也称 CUI,字符用户界面。虽然没有 GUI 操作直观，但是 CLI 更加节省计算机资源（所以一般用于服务器环境） babel, tsc, webpack, vue-cli
 - Server 服务提供(Web Server, IM...)
 
+- CLI 命令
+
+    * .break 退出多行编辑 模式
+
+    * .clear .break 的别名
+
+    * .exit 退出 REPL 模式
+
+    * .help 帮助
+
+    * .save 把当前执行结果保存起来
+
+    * .load
+
+    * .editor
+
+- 全局变量 - global。 类似浏览器全局对象 window, 但是 Node(ECMAScript) 环境中是没有 window 的（本质上，浏览器的 window 其实就是扩展自 ECMAScript 中的 global）
+
+    `console, __dirname, __filename, setTimeout, setInterval, setImmediate, module, exports, require, process, Class Buffer, URL, URLSearchParams`
+
+
+- EventLoop
+
+- 模块化
+
+    1. 一个文件就是一个独立的模块
+    2. 模块加载采用同步模式
+    3. 通过 require 函数导入， exports 对象导出。
+    4. 如果 自己定义的模块跟 核心模块冲突，默认加载的是 核心模块。
+    5. 加载时，会首先按照加载的模块的文件名称进行查找。
+    6. 加载顺序： 文件名称 -> .js -> .json -> .node
+
+## CLI
+
+- command [subCommand] [options] [arguments]
+
+    * command: 命令，比如 vue
+
+    * [subCommand]: 子命令，比如 vue create
+
+    * [options]: 选项，配置，同一个命令不同选项会有不一样的操作结果，比如 vue -h, vue -v
+
+    * [arguments]: 参数，某些命令需要使用的值，比如 vue create myApp
+
+    * 选项与参数的区别： 选项是命令内置实现，用户进行选择，参数一般是用户决定传入的值。
+
+- 选项一般会有全拼与简写形式（具体看使用的命令帮助），比如 --version = -v
+
+    * 全拼： 以 -- 开头 / 简写： 以 - 开头。
+
+    * 选项也可以接受值，值写在选项之后，通过空格分隔。
+
+    * 多个简写的选项可以连写，开头使用一个 - 即可，需要注意的是，如果有接受值的选项需要放在最后，比如：
+
+        + vue create -d -r <-r的值> myApp
+
+        + vue create -dr <-r的值> myApp
+
+- 第三方框架
+
+    * commander 命令行开发工具
+
+    * chalk 命令行样式风格控制器
+
+    * inquirer 交互式命令行工具
+
 ## 模块化
 
 ​	如果程序设计的规模达到了一定程度，则必须对其进行模块化，模块化可以有多种形式。但至少应该提供能够将代码分割为多个源文件的机制。
@@ -262,6 +328,13 @@ init();
 
 链式流：输出流.pipe(输入流).pipe(输入流)
 
+###### 流的基本类型
+
+- Writable 可写入的数据流（例如：fs.createWriteStream()）
+- Readable 可读取数据的流（例如：fs.createReadStream()）
+- Duplex 可读又可写的流（例如：net.Socket）
+- Transform 在读写过程中可以修改或转换数据的流。
+
 ## 网络
 
 ##### IP (Internet Protocol) 网络协议
@@ -284,6 +357,22 @@ init();
 一个端口只能同时被一个程序监听
 
 如果一个程序尝试监听一个已经被其他程序监听的端口，就会报端口占用的错误。
+
+##### IP&TCP
+
+IP 规定了互联网的计算机之间的定位规则。
+
+TCP 规定了互联网的计算机通过ip定位以后，发送数据的规则端口。
+
+IP -> 定位主机。
+
+端口 -> 软件，应用。
+
+在数据发送过程除了有具体发送的数据，还会有一些其他的额外数据。比如：接收和发送者的ip，为了能够让接收数据的一方能够按照这些数据反馈信息给对方。
+
+同时在发送过程数据还要按照一定规则进行打包，比如会把大的数据按照一定的规则打包一个一个小数据包，每个数据包中都包含如上的一些信息。
+
+在实际应用中，不同的软件可能都会用到这样的方式来传递数据，不过，可能在具体数据组织上会有不同的个性设置，所以不同的应用程序会对发送的数据进行自己的二次包装（TCP），形成各式的其他传输协议：HTTP\FTP\MAIL。
 
 ##### 数据传输协议
 

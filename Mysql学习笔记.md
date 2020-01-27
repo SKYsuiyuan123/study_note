@@ -154,6 +154,8 @@ select database()\s;
 show tables;
 ```
 
+- 没有数据库更改名称的 命令，要想更改名称，可以创建个 新库，然后把表复制过来。删除旧库。
+
 ## SQL
 
 - SQL(struct query language 结构化查询语言)
@@ -307,6 +309,8 @@ alter table 表名 modify 字段名 新的类型;
 
 alter table 表名 drop 字段名;
 ```
+
+Mysql 中，表 / 列 可以改名，database 不能改名。
 
 ### DML
 
@@ -501,6 +505,10 @@ select * from students where name like '_u%';
 -- 查询姓名中包含 's' 字母的学生记录
 select * from students where name like '%s%';
 
+-- 查询 张姓 另个及两个字以上的学习记录
+select * from students where name like '张_%';
+select * from students where name like '张%'; -- 有可能 会匹配到 一个 '张' 字，所以不对。
+
 -- 查询 包含 % 的记录
 select * from students where name like '%1%%' escape '1'; -- 1 不匹配。
 ```
@@ -563,6 +571,8 @@ select * from emp order by sal desc, id desc;
 #### 聚合函数（分组函数）
 
 对查询的结果进行统计计算
+
+聚合函数是对一组值执行计算并返回单一结果的函数。
 
 常用聚合函数：
 
@@ -670,6 +680,8 @@ select deptno, group_concat(sal), sum(sal) from emp where sal > 2000 group by de
 - 角标是从 0 开始
 
 ```sql
+-- SELECT 列1，列2, ... FROM 表名 LIMIT [start,] nums; -- 默认从 0 开始。
+
 -- 取 前三条 数据
 select * from emp limit 0,3;
 
@@ -695,6 +707,8 @@ slect * from emp limit (cutPage - 1) * pageSize, pageSize;
 ## 数据的完整性
 
 什么是数据的完整性： 保证用户输入的数据保存到数据库中是正确的。
+
+实体完整性、域完整性及参照完整性分别在行、列、表上实施。
 
 如何添加数据完整性： 在创建表时给表中添加约束
 
@@ -723,8 +737,10 @@ slect * from emp limit (cutPage - 1) * pageSize, pageSize;
 - 唯一约束 (unique)
 
     + 特点： 指定列的数据不能重复，可以为空值，一个表中可以有多个 unique 约束。
-
+    + 多个列可以组合成一个 唯一约束。
+    + mysql 会给唯一约束的列上默认创建一个唯一索引。
     + 格式： create table 表名（字段名1 数据类型， 字段名2 数据类型 unique）
+    + 删除约束：alter table 表名 drop 索引(index) 列名;
 
 - 自动增长列 (auto_increment)
 
@@ -746,9 +762,23 @@ slect * from emp limit (cutPage - 1) * pageSize, pageSize;
 
     + Alter table 表名 add constraint primary key (列名);
 
+##### 删除主键约束
+
+```sql
+ALTER TABLE t_user DROP PRIMARY KEY;
+```
+
 ### 域完整性
 
 使用： 限制此单元格的数据正确，不对照此列的其它单元格比较。
+
+域完整性是对数据表中字段属性的约束。
+
+它是由确定表结构时所定义的字段的属性决定的。
+
+限制数据类型，缺省值，规则，约束，是否可以为空。
+
+域完整性可以确保不会输入无效的值。
 
 域完整性约束：
 
@@ -761,6 +791,8 @@ slect * from emp limit (cutPage - 1) * pageSize, pageSize;
 - 默认值约束(default)
 
     + create table 表名(字段名1 类型，字段名2 类型 default '男');
+
+mysql 不支持 check 约束，但是使用时也没有错误提示。oracle 是支持的。
 
 ### 参照完整性
 
@@ -788,6 +820,9 @@ create table score(num int primary key atuo_increment, scores int, sid int, cons
 
 -- 先创建表，后修改表外建约束
 alter table 表名 add constraint 约束名 foreign key(列名) references 主表名(列名);
+
+-- 删除外键约束
+ALTER TABLE students DROP FOREIGN KEY 约束名;
 ```
 
 要求：
@@ -872,12 +907,11 @@ select * from stu st, score sc where st.id = sc.sid; -- 99 连接法
 
 + 等值连接
 
-    `两个表同时出现的 id 号（值）才显示`
-
     ```sql
-    -- inner 可以省略
+    -- 两个表同时出现的 id 号（值）才显示
     select * from stu st inner join score sc on st.id = sc.id;
     
+    -- inner 可以省略
     -- 查询大于 70 分的
     select * from stu st join score sc on st.id = sc.id where sc.score > 70;
     
@@ -1058,7 +1092,8 @@ select e1.empno, e1.ename, e2.empno, e2.ename from emp e1, emp e2 where e1.mgr =
 + insert(str, x, y, instr) 将 str 从 x 开始 y 个，替换为 instr
 + Lower(str) 和 Upper(str)
 + Left(str, x) 和 right(str, x) 分别返回字符串 str 最左边的 x 个字符和最右边的 x 个字符。如果第二个参数为 null, 那么则不返回任何字符。
-+ length(str)：返回 str 的长度。如果字符串包含空格，那么空格也算在长度之内。
++ length(str)：返回 str 的长度（字节长度，一个汉字占三个字节）。如果字符串包含空格，那么空格也算在长度之内。
++ char_length(str)：返回 str 的 字符长度（一个汉字是一个字符）。
 + LPAD(str, n, pad) 和 RPAD(str, n, pad) 用字符串 pad 对 str 最左边和最右边进行填充，直到长度为 n 个字符长度。
 + ltrim(str) 和 rtrim(str) 去掉字符串当中 最左侧和最右侧的空格。
 + trim(str) 去掉字符串左右的空格。
@@ -1069,6 +1104,7 @@ select e1.empno, e1.ename, e2.empno, e2.ename from emp e1, emp e2 where e1.mgr =
 + REPEAT(str, x) 返回 str 重复 x 次的结果。
 + replace(str, a, b) 用字符串 b 替换字符串 str 中所有出现的字符串 a
 + substring(str, x, y) 返回字符串 str 中第 x 位置起 y 个字符长度的字符。
++ mid(str, x, y) 返回字符串 str 中第 x 位置起 y 个字符长度的字符。
 
 #### 数值函数
 
@@ -1077,6 +1113,9 @@ select e1.empno, e1.ename, e2.empno, e2.ename from emp e1, emp e2 where e1.mgr =
 + FLOOR(x) 向下取整
 + MOD(x, y) 返回 x/y 的模
 + RAND() 返回 0-1 内的随机值
++ round(x, y)  小数点后 y 位 实现四舍五入。默认返回一个 四舍五入的值。
++ last(x1, x2, x3, x4, ...) 返回其中最小的值。
++ greatest(x1, x2, x3, x4, ...) 返回其中最大的值。
 
 #### 日期和时间函数
 

@@ -297,7 +297,7 @@ function sum(a, b, c) {
 
 ​	// 形参与实参是映射关系。
 
-​	sum.length: 形参长度
+​	sum.length: 形参长度。
 
 ​	arguments.length: 实参长度。
 
@@ -325,6 +325,11 @@ fun(mianji(10)); // 将 mianji(10) 的返回值作为参数传递进 fun() 里�
 ```
 
 JS 调用函数传递变量参数时，是值（基本值 或 引用值）的传递。
+
+函数的参数：
+
+- 如果是简单类型，会做一个值类型的数值副本传到函数内部。
+- 如果是引用类型，会将引用类型的地址值复制给参数。
 
 ```javascript
 let a = 3;
@@ -797,6 +802,45 @@ F.b(); // b()
 f.a(); // a()
 f.b(); // 报错 f.b is not a function
 ```
+
+```javascript
+// 情况一 位置不同打印不同。
+Person.prototype.name = "sunny";
+function Person() {}
+
+var p1 = new Person();
+
+console.log(p1);
+console.log(p1.name); // "sunny"
+
+Person.prototype.name = "cherry";
+
+var p2 = new Person();
+
+console.log(p1.name); // "cherry"
+console.log(p2.name); // "cherry"
+
+
+// 情况二
+Person.prototype.name = "sunny";
+function Person() {}
+
+var p1 = new Person();
+
+console.log(p1);
+console.log(p1.name); // "sunny"
+
+Person.prototype = {
+  name: "cherry"
+};
+
+var p2 = new Person();
+
+console.log(p1.name); // "sunny"
+console.log(p2.name); // "cherry"
+```
+
+
 
 #### call / apply
 
@@ -1291,13 +1335,13 @@ console.log(obj3); // { name: '小明', age: 18, mail: '男' }
 
 * 迭代协议：规定了迭代与实现的逻辑
 
-* 迭代器：具体的迭代实现逻辑
+* 迭代器：具体的迭代实现逻辑 - [Symbol.iterator]
 
-* 迭代对象：可被迭代的对象 - [Symbol.iterator] 方法
+* 迭代对象：可被迭代的对象 - [Symbol.iterator] 方法。实现了迭代器的对象。
 
 * 迭代语句
 
-    for ... in：以原始插入的顺序迭代对象以及对象原型链上的所有可枚举属性 可用于 数组，对象
+    for ... in：以原始插入的顺序迭代 对象 以及 对象原型链 上的所有可枚举属性 可用于 数组，对象
 
     for ... of：根据迭代对象的迭代器具体实现迭代对象数据 不可以用于 对象，因为对象没有可迭代的方法，不过可以手动实现。
 
@@ -1349,7 +1393,7 @@ console.log(obj3); // { name: '小明', age: 18, mail: '男' }
     }
     
     // obj[Symbol.iterator]().next() => {done: true} 终止
-    for (const iterator of obj2) { // obj2 必须是一个可迭代的对象
+    for (const iterator of obj2) { // obj2 必须是一个可迭代的对象。即：of 后边必须跟一个 可迭代的对象。
         console.log(iterator);
         // { key: 'c', value: 5 }
         // { key: 'd', value: 6 }
@@ -1363,7 +1407,7 @@ const arr3 = Object.freeze([1, 2, 3]); // 冻结对象[1, 2, 3]
 // arr3.push(4); // arr3 被冻结了，所以不可以再 push 内容了，如果 push 会报错
 console.log(arr3);
 
-console.log(Object.isFrozen(arr3)); // 查看对象是否被冻结了, true or false, 本例子为 true
+console.log(Object.isFrozen(arr3)); // true 查看对象是否被冻结了, true or false 
 
 // 数组里边嵌套数组， 里边嵌套的数组是不会被冻结的，可以用 递归实现 里边嵌套的数组也被冻结住
 const arr4 = Object.freeze([1, 2, 3, [6, 8]]);
@@ -1390,6 +1434,13 @@ console.log(Object.isFrozen(arr4));
     }
     
     fn2(3); // 3, 0
+    
+    function fn3(obj = {x: 1, y: 2}) { // y 写在参数列表的最后面
+        console.log(obj);
+    }
+    
+    fn3(); // {x: 1, y: 2}
+    fn3({x: 10, y: 20}); // {x: 10, y: 20}
     ```
 
 2. rest 剩余参数
@@ -1430,6 +1481,8 @@ console.log(Object.isFrozen(arr4));
 #### 内置对象
 
 String, Number, Array, Object, Set, WeakSet, Map, WeakMap
+
+Map与WeakMap 的区别，WeakMap 会有垃圾回收。Map 没有。
 
 #### Promise
 
