@@ -1417,6 +1417,8 @@ console.log(typeof sy1); // symbol
 console.log(sy1 === sy2); // false
 ```
 
+如果 symbol 作为对象的 key，则该key for...in 遍历时，遍历不出来。
+
 作用：
 
 1. 属性私有化 - 数据保护
@@ -1425,13 +1427,46 @@ console.log(sy1 === sy2); // false
 
 新增 作用域 (let, const)
 
-### 结构赋值
+let，const：
 
-允许按照一定模式，从数组和对象中提取值，并对变量进行赋值，这被称为结构赋值。
+- 没有预解析，不存在变量提升。
+- 同一个作用域里，不能重复定义变量。
+- for 循环，for 循环里面是父作用域，里面又一个。
 
-* null 和 undefined 不能进行结构赋值
+const 定义长量时，必须有值，不能不赋值，赋值完后不能修改。
 
+### 解构赋值
+
+允许按照一定模式，从数组和对象中提取值，并对变量进行赋值，这被称为 解构赋值。
+
+* null 和 undefined 不能进行解构赋值
 * 原始类型调用的是自己的包装类
+
+```javascript
+// 解构 null 和 undefined 的区别。
+let [a, b, c='暂无'] = ['aa', 'bb', null];
+console.log(a, b, c); // 'aa', 'bb', null
+
+let [d, f, g='暂无'] = ['aa', 'bb', undefined];
+console.log(d, f, g); // 'aa', 'bb', '暂无'
+
+let [q, w, e='暂无'] = ['aa', 'bb'];
+console.log(q, w, e); // 'aa', 'bb', '暂无'
+
+let {a, b = 'bb'} = {a: 'aa', b: null};
+console.log(a, b); // 'aa', null
+
+let {a, b = 'bb'} = {a: 'aa', b: undefined};
+console.log(a, b); // 'aa', 'bb'
+
+let {a, b = 'bb'} = {a: 'aa'};
+console.log(a, b); // 'aa', 'bb'
+
+// 先定义变量，后解构
+let a, b;
+({a, b = 'bb'} = {a: 'aa'});
+console.log(a, b); // 'aa', 'bb'
+```
 
 ### 扩展运算符
 
@@ -1584,6 +1619,7 @@ console.log(Object.isFrozen(arr4));
     }
     
     fn2(3); // 3, 0
+    fn2(3, null); // 3, null
     
     function fn3(obj = {x: 1, y: 2}) {
         console.log(obj);
@@ -1638,6 +1674,14 @@ Map与WeakMap 的区别，WeakMap 会有垃圾回收。Map 没有。
 
 ES6 中新增的异步编程解决方案，体现在代码中它是一个对象，可以通过 Promise 构造函数来实例化。
 
+#### 三种状态
+
+- unresolved 等待任务完成（pending）
+- resolved 任务完成，并且没有任何问题
+- rejected 任务完成，但是出现问题
+
+
+
 * 当 Promise 被实例化的时候，callback 的异步任务就会被执行
 
 * 我们可以通过传入的 resolve, reject, 去改变当前 Promise 任务的状态
@@ -1664,6 +1708,11 @@ Promise.prototype.then()
 Promise.prototype.catch()
 ```
 
+```javascript
+Promise.resolve(); // 立刻返回 成功的 promise 对象。
+Promise.reject(); // 立刻返回 失败的 promise 对象。
+```
+
 两个常用的静态方法：
 
 ```javascript
@@ -1671,12 +1720,81 @@ Promise.all();
 Promise.race();
 ```
 
-* Promise.all([p1, p2]) 两个都成功才会执行 then 方法
-* Promise.race([p1, p2]) 只要有一个成功就会执行 then 方法
+* Promise.all([p1, p2])
+
+  两个都成功时才会执行 then 方法，返回 跟请求时顺序一样的成功的对象数组。
+
+  但是只要有一个失败，立马执行 catch 方法，返回错误的那个对象。
+
+* Promise.race([p1, p2])
+
+  只要有一个请求返回时，就会立马执行 then 或者 catch 方法， 成功 执行 then 方法，失败执行 catch 方法。
+
+#### 例子
 
 ```javascript
-Promise.resolve(); // 立刻返回 成功的 promise 对象。
-Promise.reject(); // 立刻返回 失败的 promise 对象。
+let p1 = new Promise((resolve, reject) => {
+  setTimeout(() => {
+    resolve('aaa');
+  }, 1000);
+});
+
+let p2 = new Promise((resolve, reject) => {
+  setTimeout(() => {
+    reject('bbb');
+  }, 2000);
+});
+
+let p3 = new Promise((resolve, reject) => {
+  setTimeout(() => {
+    reject('ccc');
+  }, 3000);
+});
+
+// let p1 = Promise.reject('aa');
+// let p2 = Promise.resolve('bb');
+// let p3 = Promise.reject('cc');
+
+Promise.all([p1, p2, p3])
+  .then(res => {
+    console.log('成功了1111');
+    console.log(res);
+  })
+  .catch(err => {
+    console.log('失败1111');
+    console.log(err);
+  });
+// 打印：失败1111 bbb
+
+// Promise.race([p1, p2, p3])
+//   .then(res => {
+//     console.log('成功了2222');
+//     console.log(res);
+//   })
+//   .catch(err => {
+//     console.log('失败22222');
+//     console.log(err);
+//   });
+// 打印：失败22222 aaa
+```
+
+### class
+
+class 没有定义提升功能。
+
+```javascript
+class Person {
+    constructor(name) {
+        this.name = name;
+        this.showName = this.showName.bind(this); // 矫正 this
+    }
+    showName() {
+        return `名字为：${this.name}`;
+    }
+}
+let p1 = new Person(‘Strive’);
+let { showName } = p1; // 不建议这么用
+console.log(showName()); // 不用 bind this 会不存在，用了，this 指向实例对象。
 ```
 
 ### Web Workers

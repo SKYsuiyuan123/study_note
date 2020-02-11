@@ -3,16 +3,38 @@
 ## 非关系型数据库
 
 - 图像数据库
-
 - 列数据库(hbase)
-
 - xml 数据库
-
 - 键值对(k, v)数据库
-
 - 文档数据库 (MongoDB) 最符合关系数据库
 
+
+
+- bson 方式存储(类似于 json) binary json
+- 是非关系数据库当中功能最丰富，最像关系数据库的。
+- 一半在内存中，一般在 fs 中
+
+## 关系型数据库：
+
+- 信息是分类的
+- 信息是有关联的（一对一，一对多，多对多）
+- 信息存储有限
+
 ## MongoDB
+
+云数据库、分布式、大数据、分析数据 Nosql(非关系型)
+
+`mongoDB是一个 C/S 架构的`
+
+- database 数据库(database) 由多个集合组成的。
+- collection 集合 binary Json 表示的是一条完整的记录
+- field 是 collection 的一个键值对 key: value
+- index 索引
+- primary key 主键 mongodb 生成的 它会自动将 _id 字段设置为 主键
+
+`一个mongodb中可以建立多个数据库，Mongodb的默认数据库为 'db' 该数据库存储在 data 目录中。Mongodb的单个实例可以容纳多个独立的数据库，每一个都有自己的集合和权限，不同的数据库也放置在不同的文件中。`
+
+
 
 - 最符合 关系数据库
 
