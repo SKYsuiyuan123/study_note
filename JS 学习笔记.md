@@ -8,7 +8,7 @@
 
 #### 解释型
 
-解释一行执行一行。优点：夸平台。缺点：执行慢。如：PHP, Python, JavaScript 等
+解释一行执行一行。优点：夸平台。缺点：执行慢。如：PHP, Python, JavaScript
 
 Java 是一个具有编译型和解释型的语言。
 
