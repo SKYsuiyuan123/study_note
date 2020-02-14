@@ -1731,6 +1731,10 @@ Map与WeakMap 的区别，WeakMap 会有垃圾回收。Map 没有。
 
 ES6 中新增的异步编程解决方案，体现在代码中它是一个对象，可以通过 Promise 构造函数来实例化。
 
+```javascript
+typeof Promise.resolve('1'); // 'object'
+```
+
 #### 三种状态
 
 - unresolved 等待任务完成（pending）
@@ -1915,6 +1919,8 @@ Promise.all([p1, p2, p3])
 
 generator 返回的是一个 迭代器函数。
 
+generator 对后续的流程控制带来 便利。
+
 co 函数：自动化 generator 函数调用器。自己实现的话，就递归调用 next 函数。
 
 ```javascript
@@ -1969,7 +1975,35 @@ for (const x of fib(12)) {
 }
 ```
 
+### async & await
 
+把异步的写法变成了同步的写法，但是本质还是异步编程。
+
+await 后边跟的是 一个 promise 对象。
+
+```javascript
+const p1 = new Promise((resolve, reject) => {
+  setTimeout(() => {
+    resolve(1);
+    // reject();
+  }, 1000);
+});
+
+async function fn() {
+  console.time("aa");
+  let arr = [];
+  for (let i = 0; i < 500; i++) {
+    let val = await p1;
+    arr.push(val);
+  }
+  console.log(arr);
+  console.timeEnd("aa");
+  // arr => [1, ...498个1..., 1]
+  // aa: 1008.8447265625ms
+}
+
+fn();
+```
 
 ### class
 
