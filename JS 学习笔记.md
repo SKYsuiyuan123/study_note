@@ -719,6 +719,22 @@ let car2 = new Car();
 // car1 与 car2 是两个对象，互相之间不会影响。
 ```
 
+#### 对象的属性描述符
+
+参考：https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Object/defineProperty
+
+```javascript
+let obj = {};
+
+// 默认情况下，使用 Object.defineProperty() 添加的属性值是不可修改的。
+Object.defineProperty(obj, 'a', {
+  configurable: true, // 当且仅当该属性的 configurable 为 true 时，该属性描述符才能够被改变，同时该属性也能从对应的对象上被删除。默认为 false。
+  enumerable: true, // 当且仅当该属性的enumerable为true时，该属性才能够出现在对象的枚举属性中。默认为 false。
+  value: 'aa', // 该属性对应的值。可以是任何有效的 JavaScript 值（数值，对象，函数等）。默认为 undefined。
+  writable: true // 当且仅当该属性的writable为true时，value才能被赋值运算符改变。默认为 false。
+});
+```
+
 #### 包装类
 
 原始值：let num = 123;
@@ -1423,6 +1439,38 @@ console.log(sy1 === sy2); // false
 
 1. 属性私有化 - 数据保护
 
+
+
+```javascript
+let Person = (function() {
+  let _gender = Symbol("gender");
+
+  function P(name, gender) {
+    this.name = name;
+    this[_gender] = gender;
+  }
+
+  P.prototype.sayGender = function() {
+    return this[_gender];
+  };
+
+  P.prototype.setGender = function(gender) {
+    this[_gender] = gender;
+  };
+
+  return P;
+})();
+
+let p1 = new Person("sky", "男");
+let p2 = new Person("小莫", "男");
+
+console.log(p1);
+console.log(p2);
+console.log(p2.setGender("女"));
+console.log(p2);
+console.log(p2.sayGender());
+```
+
 ### let, const
 
 新增 作用域 (let, const)
@@ -1530,60 +1578,71 @@ console.log(obj3); // { name: '小明', age: 18, mail: '男' }
 
     for ... of：根据迭代对象的迭代器具体实现迭代对象数据 不可以用于 对象，因为对象没有可迭代的方法，不过可以手动实现。
 
-    ```javascript
-    let arr = ['a', 'b', 'c'];
-    arr.names = 'sku';
-    
-    for (const key in arr) {
-        console.log(key, arr[key]);
-        // 0 a
-        // 1 b
-        // 2 c
-        // names sku
-    }
-    
-    for (let attr of arr) {
-        console.log(attr, arr[attr]);
-        // a undefined
-        // b undefined
-        // c undefined
-    }
-    
-    let obj2 = {
-        c: 5,
-        d: 6
-    };
-    
-    // 实现迭代协议
-    obj2[Symbol.iterator] = function () {
-        let keys = Object.keys(obj2); // 获取对象的所有 keys ['c', 'd']
-        let len = keys.length;
-        let n = 0;
+
+
+```javascript
+let arr = ["a", "b", "c"];
+arr.names = "sku";
+let k = Symbol("k");
+arr[k] = "kkk"; // Symbol 属性不会被遍历出来。
+
+for (const key in arr) {
+  console.log(key, arr[key]);
+  // 0 a
+  // 1 b
+  // 2 c
+  // names sku
+}
+
+for (let attr of arr) {
+  console.log(attr);
+  // a
+  // b
+  // c
+}
+
+let obj2 = {
+  c: 5,
+  d: 6,
+  [k]: "kkk"
+};
+
+// 实现迭代协议
+obj2[Symbol.iterator] = () => {
+  const keys = Object.keys(obj2); // 获取对象的所有 keys ['c', 'd']
+  const len = keys.length;
+  let n = 0;
+
+  return {
+    next() {
+      if (n < len) {
         return {
-            next: function () {
-                if (n < len) {
-                    return {
-                        // value: keys[n++], // 每次循环得到 key 值
-                        // value: obj2[keys[n++]], // 每次循环得到 value 值
-                        value: { key: keys[n], value: obj2[keys[n++]] }, // 每次循环得到一个 对象，对象包括一个 key 和 对应的 value
-                        done: false
-                    }
-                } else {
-                    return {
-                        done: true
-                    }
-                }
-            }
-        }
+          // value: keys[n++], // 每次循环得到 key 值
+          // value: obj2[keys[n++]], // 每次循环得到 value 值
+          value: {
+            key: keys[n],
+            value: obj2[keys[n++]]
+          }, // 每次循环得到一个 对象，对象包括一个 key 和 key 对应 的 value
+          done: false
+        };
+      } else {
+        return {
+          value: undefined,
+          done: true
+        };
+      }
     }
-    
-    // obj[Symbol.iterator]().next() => {done: true} 终止
-    for (const iterator of obj2) { // obj2 必须是一个可迭代的对象。即：of 后边必须跟一个 可迭代的对象。
-        console.log(iterator);
-        // { key: 'c', value: 5 }
-        // { key: 'd', value: 6 }
-    }
-    ```
+  };
+};
+
+// obj[Symbol.iterator]().next() => {done: true} 终止
+for (const iterator of obj2) {
+  // obj2 必须是一个可迭代的对象。即：of 后边必须跟一个 可迭代的对象。
+  console.log(iterator);
+  // { key: 'c', value: 5 }
+  // { key: 'd', value: 6 }
+}
+```
 
 ### 对象冻结
 
@@ -1653,9 +1712,7 @@ console.log(Object.isFrozen(arr4));
     console.log(arr3); // [1, 2, 3, 'a', 'b', 'c']
     ```
 
-### 箭头函数
-
-使用函数表达式
+### 箭头函数使用函数表达式
 
 注意事项：
 
@@ -1683,16 +1740,11 @@ ES6 中新增的异步编程解决方案，体现在代码中它是一个对象�
 
 
 * 当 Promise 被实例化的时候，callback 的异步任务就会被执行
-
 * 我们可以通过传入的 resolve, reject, 去改变当前 Promise 任务的状态
-
 * resolve, reject 是两个函数，调用 resolve 这个函数，会把状态改成 resolved, 调用 reject 函数会把状态 改成 rejected
-
 * Promise 对象下有一个方法： then, 该方法在 Promise 对象的状态发生改变的时候触发 then 的回调。then 方法默认返回 一个 promise 对象，并且该 promise 对象的默认状态 是成功的。
-
 * 当对应的 promise 对象的状态变成了 resolved, 那么 then 的第一个 callback 就会被执行，如果 promise 对象的状态变成了 rejected 那么 then 的第二个 callback 就会被执行。
-
-* catch 和 then 一样 也会返回一个默认的 resolved 状态的 promise 对象。
+* catch 和 then 一样 也会返回一个默认的 resolved（成功的）状态的新的 promise 对象。
 
 new Promise(cb) ===> 实例的基本使用 Pending Resolved Rejected
 ```javascript
@@ -1712,6 +1764,87 @@ Promise.prototype.catch()
 Promise.resolve(); // 立刻返回 成功的 promise 对象。
 Promise.reject(); // 立刻返回 失败的 promise 对象。
 ```
+
+#### 没有解决的问题
+
+Promise 对后续的流程控制带来极大的麻烦！
+
+```javascript
+const p1 = new Promise((resolve, reject) => {
+  console.log(1);
+  setTimeout(() => {
+    // resolve();
+    reject();
+  }, 1000);
+});
+
+// catch 和 then 一样 也会返回一个默认的 resolved（成功的）状态的新的 promise 对象。
+
+// p1.then(
+//   () => {
+//     console.log("成功1.");
+//   },
+//   () => {
+//     console.log("失败了1.");
+//   }
+// )
+//   .then(() => {
+//     console.log("成功2..");
+//   })
+//   .then(() => {
+//     console.log("成功3...");
+//   });
+
+// p1.then(() => {
+//   console.log("成功1.");
+// })
+//   .catch(err => {
+//     console.log("失败了1.");
+//   })
+//   .then(() => {
+//     console.log("成功2..");
+//   })
+//   .then(() => {
+//     console.log("成功3...");
+//   })
+
+// 上边两种情况打印：1, 失败了1., 成功2.., 成功3...
+
+// p1.then(() => {
+//   console.log("成功1.");
+// })
+//   .then(() => {
+//     console.log("成功2..");
+//   })
+//   .then(() => {
+//     console.log("成功3...");
+//   })
+//   .catch(err => {
+//     console.log("失败了1.");
+//   });
+
+// 这种情况打印：1, 失败了1.
+
+p1.then(() => {
+  console.log("成功1.");
+})
+  .catch(err => {
+    console.log("失败了1.");
+  })
+  .then(() => {
+    console.log("成功2..");
+  })
+  .then(() => {
+    console.log("成功3...");
+  })
+  .catch(err => {
+    console.log("失败了2.");
+  });
+
+// 上边两种情况打印：1, 失败了1., 成功2.., 成功3...
+```
+
+#### Promise.all & Promise.race
 
 两个常用的静态方法：
 
@@ -1777,6 +1910,66 @@ Promise.all([p1, p2, p3])
 //   });
 // 打印：失败22222 aaa
 ```
+
+### Generator
+
+generator 返回的是一个 迭代器函数。
+
+co 函数：自动化 generator 函数调用器。自己实现的话，就递归调用 next 函数。
+
+```javascript
+// 例一
+function* fn() {
+	yield 3;
+}
+
+let f = fn();
+let g = f.next();
+console.log(g); // {value: 3, done: false}
+
+
+// 例二
+function* fn2() {
+  console.log(1);
+  
+  let val = yield getData();
+  console.log(val);
+  
+  console.log(3);
+}
+
+function getData() {
+  setTimeout(() => {
+    console.log(2);
+    f2.next(4);
+  }, 2000);
+}
+
+let f2 = fn2();
+f2.next(); // 1, ...延迟2s..., 2, 4, 3
+
+
+// 例三
+function* fib(max) {
+  let [a, b, n] = [0, 1, 0];
+
+  while (n < max) {
+    yield a;
+    [a, b] = [b, a + b];
+    n++;
+  }
+  return;
+}
+
+// let f = fib(5);
+// console.log(f.next());
+
+for (const x of fib(12)) {
+  console.log(x);
+}
+```
+
+
 
 ### class
 
