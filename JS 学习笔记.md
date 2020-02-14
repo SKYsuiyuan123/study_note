@@ -1978,6 +1978,53 @@ for (const x of fib(12)) {
 }
 ```
 
+```javascript
+function* fn() {
+  console.log(1);
+
+  let val1 = yield getData();
+  console.log(val1);
+
+  let val2 = yield getData();
+  console.log(val2);
+
+  let val3 = yield getData();
+  console.log(val3);
+
+  console.log(3);
+}
+
+function getData() {
+  return new Promise((resolve, reject) => {
+    setTimeout(() => {
+      resolve(100);
+    }, 1000);
+  });
+}
+
+// 封装 co 函数
+function co(callback) {
+  const cb = callback();
+
+  function next(d) {
+    const result = cb.next(d);
+
+    if (result.done) {
+      return;
+    }
+    result.value.then(data => {
+      next(data);
+    });
+  }
+
+  next();
+}
+
+co(fn);
+```
+
+
+
 ### async & await
 
 把异步的写法变成了同步的写法，但是本质还是异步编程。
