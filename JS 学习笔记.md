@@ -1732,7 +1732,10 @@ Map与WeakMap 的区别，WeakMap 会有垃圾回收。Map 没有。
 ES6 中新增的异步编程解决方案，体现在代码中它是一个对象，可以通过 Promise 构造函数来实例化。
 
 ```javascript
-typeof Promise.resolve('1'); // 'object'
+const p1 = Promise.resolve('1');
+
+typeof p1; // 'object'
+p1.toString(); // '[object Promise]'
 ```
 
 #### 三种状态
