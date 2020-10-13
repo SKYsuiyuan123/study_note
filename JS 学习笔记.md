@@ -1246,6 +1246,14 @@ arr[n] = 'abc'; 不会报错，会撑大数组。
 1. 改变原数组：push, pop, shift, unshift, sort, reverse, splice, ...
 2. 不改变原数组：concat, join, slice, toString, ..
 
+##### sort: 
+
+sort 的参数可以接收一个函数，这个函数接收两个参数，排序时，看函数的返回值。
+
+1. 当返回值为负数时，那么，位置上 前面的数放在前面
+2. 当为 正数时，那么，位置上 后面的数放在前面
+3. 当为 0 时，位置不动。
+
 ```javascript
 // 使用 delete 删除
 let arr = [1, 2, 3];
