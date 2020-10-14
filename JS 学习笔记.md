@@ -1269,7 +1269,7 @@ console.log(arr[0]); // undefined
 arguments：类数组，属于对象， typeof(arguments) => object。
 
 ```javascript
-// 1.属性要为索引（数字）属性，必须有 length 属性，最后加上 push。
+// 1.属性要为索引（数字）属性，必须有 length 属性，最好加上 push。
 let obj = {
     0: 'a',
     1: 'b',
@@ -1321,6 +1321,48 @@ Number([]); // 0
 {} + 1; // 1
 String([]) + 1; // '1'
 [] == []; // false 引用值比较地址是否相同
+```
+
+### 习题
+
+```javascript
+// 1. 准确判断变量的类型
+function type(target) {
+  const template = {
+    '[object Array]': 'array',
+    '[object Object]': 'object',
+    '[object Number]': 'number - object',
+    '[object Boolean]': 'boolean - object',
+    '[object String]': 'string - object',
+  };
+  
+  if (target === null) {
+    return 'null';
+  }
+  
+  if (typeof target === 'object') {
+    const str = Object.prototype.toString.call(target);
+    return template[str];
+  } else {
+    return typeof target;
+  }
+}
+
+// 2. 数组去重（学习 把数组的值作为 temp 的属性名，即利用对象属性名唯一的特性。）
+Array.prototype.unique = function () {
+  const temp = {};
+  const arr = [];
+  const len = this.length;
+  
+  for (let i = 0; i < len; i += 1) {
+    if (!temp[this[i]]) {
+      temp[this[i]] = 'true';
+      arr.push(this[i]);
+    }
+  }
+  
+  return arr;
+}
 ```
 
 ### 严格模式
@@ -1420,6 +1462,84 @@ $(document).ready(function() {
    // to do ... 
 });
 ```
+
+### 正则
+
+转义字符：\
+
+\n 换行符，\r\n 回车换行，\t 缩进(制表符)
+
+##### 作用
+
+正则表达式的作用：匹配特殊字符或有特殊搭配原则的字符的最佳选择。
+
+正则表达式是一个对象。
+
+##### 创建方式
+
+- 直接量 （推荐）
+- new RegExp();
+
+##### 属性（修饰符）
+
+- /i ignoreCase 忽视大小写。
+- /g 执行全局匹配。
+- /m 执行多行匹配。
+
+##### 方法
+
+- reg.test(str); 只能判断 字符串符不符合正则片段，返回 true / false
+- str.match(reg); 匹配 正则的规则，返回 匹配后的结果，返回值是个数组。
+
+特殊符号
+
+- ^a 以 a 开头。
+
+
+
+```javascript
+// 方式 1.
+let reg = /abc/;
+let reg2 = /abc/i;
+let reg3 = /abc/g;
+let reg4 = /abc/m;
+let reg5 = /^abc/g;
+let reg6 = /^abc/gm;
+
+
+const str3 = 'abcababcadfsabc';
+const strRegArr3 = str3.match(reg3);
+console.log(strRegArr3); // ['abc', 'abc', 'abc']
+
+const str5 = 'abcababcadfsabc';
+const strRegArr5 = str5.match(reg5);
+console.log(strRegArr5); // ['abc']
+
+const str6 = 'abcab\nabcadfsabc';
+const strRegArr6 = str6.match(reg6);
+console.log(strRegArr6); // ['abc', 'abc']
+
+// 方式 2.
+let regexp = new RegExp('abc');
+let regexp2 = new RegExp('abc', 'i');
+let regexp3 = new RegExp('abc', 'g');
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
