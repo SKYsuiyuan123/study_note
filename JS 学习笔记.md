@@ -8,7 +8,7 @@
 
 #### 解释型
 
-解释一行执行一行。优点：夸平台。缺点：执行慢。如：PHP, Python, JavaScript
+解释一行执行一行。优点：跨平台。缺点：执行慢。如：PHP, Python, JavaScript
 
 Java 是一个具有编译型和解释型的语言。
 
@@ -16,9 +16,13 @@ JS 是动态性语言，脚本语言，解释型语言，跨平台，单线程�
 
 ## 内存
 
+栈内存有两个作用：1.供代码执行，2.存储基本类型值。
+
+堆内存只有一个作用：存储引用类型值。
+
 #### 内存溢出
 
-一种程序运行出现的错误，当程序运行需要的内存超过了剩余的内存时，就会抛出内存溢出的错误。
+一种程序运行时出现的错误，当程序运行需要的内存超过了剩余的内存时，就会抛出内存溢出的错误。
 
 #### 内存泄露
 
@@ -59,9 +63,13 @@ JS 是动态性语言，脚本语言，解释型语言，跨平台，单线程�
 
 #### 多进程 & 多线程
 
-多进程运行：一个应用程序可以同时启动多个实例运行
+##### 多进程运行：
 
-多线程：在一个进程内，同时有多个线程运行
+一个应用程序可以同时启动多个实例运行。
+
+##### 多线程：
+
+在一个进程内，同时有多个线程运行。
 
 
 
@@ -73,8 +81,8 @@ js 是单线程运行的，但是使用 H5 中的 Web Workers 可以多线程运
 
 #### 变量的类型
 
- - 原始值： Number, Boolean, String, Undefined, Null, Symbol
- - 引用值：Array, Object, Function, Date, RegExp
+ - 原始值： Number, Boolean, String, Undefined, Null, Symbol, BigInt
+ - 引用值：Array, Object, Function, Date, Math, RegExp
  - 原始值：不可改变的原始值（栈内存的东西是无法删除的，只能覆盖）
 
 #### 变量的存放位置
@@ -114,6 +122,35 @@ fn2(a);
 console.log(a.age); // 13
 ```
 
+#### 数据类型
+
+- 基本数据类型：number string boolean null undefined symbol BigInt
+- 引用数据类型：object（普通对象、数组对象、正则对象、日期对象...）function
+
+
+
+字符串中无需记忆原始字符串是否改变，因为它是基本类型值，每一个操作都是直接操作值，对原始字符串不会产生任何影响（数组之所以要记住是否改变，是因为数组是对象类型，操作的是堆内存，方法的执行很可能把原始堆内存中的信息改变了，所以需要记忆原始数组是否改变。）
+
+#### 类型检测
+
+typeof [value] 检测数据类型的运算符
+
+[example] instanceof [class] 检测某一个实例是否属于这个类
+
+[example].constructor === [class] 检测实例和类的关系，从而检测数据类型
+
+Object.prototype.toString.call([value]) 检测数据类型
+
+
+
+instanceof 检测的主要是原型。基于原型链。
+
+计算机 typeof 返回的数据类型 机器码 01011: 000 => object. 检测是 后三位。
+
+
+
+typeof Array => 'function'
+
 #### 内存管理
 
 内存生命周期：
@@ -145,6 +182,8 @@ fn();
 
 ### Number
 
+Number(对象), 使用 Number 转化普通对象时，会调先用 对象的 valueOf 方法，再调用对象的 toString 方法。
+
 ```javascript
 /*
 * Infinity
@@ -164,13 +203,45 @@ console.log(b); // Infinity
 // JS中可以表示的数字的最小值
 let a = Number.MIN_VALUE;
 console.log(a); // 5e-324
+
+let aa = {aa: 1};
+aa.valueOf = () => 111;
+console.log(Number(aa)); // 111
+
+```
+
+### 三元运算符
+
+一些补充
+
+```javascript
+// 在条件成立或不成立的时候，如果必须做一些事情，则使用 null/undefined 等来占位即可，不占位会报错。
+let x1 = 10;
+if (x1 == 10) {
+  x1++;
+}
+
+// 等价于：
+let x = 10;
+x == 10 ? x++ : null;
+
+// 如果需要做多件事情，则用 () 包起来，中间用 逗号分隔
+let y1 = 10;
+if (y1 > 0) {
+  y1++;
+  console.log(y1);
+}
+
+// 等价于：
+let y = 10;
+y > 0 ? (y++, console.log(y)) : null;
 ```
 
 ### typeof 操作符
 
 写法：typeof xx 或者 typeof (xx)
 
-返回值：'number', 'string', 'boolean', "object", "undefined", "function", "symbol"
+返回值：'number', 'string', 'boolean', "object", "undefined", "function", "symbol", "bigint"
 
 typeof null 返回 'object'
 
@@ -231,7 +302,23 @@ console.log(parseInt(rs2)); // 10
 
 没有类型转换： ===，!==
 
-undefined，null，NaN，'""，0，这六个转换为 布尔值 后都是 false
+undefined，null，NaN，'""，0，这五个转换为 布尔值 后都是 false
+
+
+
+##### a++ 和 a += 1 区别
+
+a++ 和 a += 1 都是在自身基础上累加 1，但是 a++ 浏览器会给其做特殊处理（会把其转换为 数字再进行累加）。
+
+在 a 是 字符串 和 对象 的情况下，会出现不同的结果。
+
+a-- 也是。
+
+
+
+对象 == 字符串，对象转换为 字符串
+
+其余的都是把值转换为数字类型，然后再比较。
 
 ```javascript
 /* 隐士类型转换 */
@@ -284,6 +371,33 @@ null == undefined => true
 null == null => true
 
 Infinity == Infinity => true
+
+// a++ & a += 1
+let aa = '10';
+a++; // a-- 也是这样。
+console.log(aa); // 11
+let bb = '10'
+bb += 1;
+console.log(bb); // '101'
+
+let obj = {a: 1};
+obj++; // obj-- 也是这样
+console.log(obj); // NaN
+let obj2 = {a: 1};
+obj2 += 1;
+console.log(obj2); // [object Object]1
+
+
+console.log([10] == '10'); // => '10' == '10' true
+console.log({} == '{}'); // => '[object Object]' == '{}' false
+console.log(1 == true); // => 1 == 1 true
+console.log(2 == true); // => 2 == 1 false
+console.log(-1 == false); // => -1 == 0 false
+console.log(0 == false); // => 0 == 0 true
+console.log(1 == '1'); // => 1 == 1 true
+console.log(true == '1'); // => 1 == 1 true
+console.log(false == ''); // => 0 == 0 true
+console.log([] == 0); // => 0 == 0 true
 ```
 
 ### 循环
@@ -324,15 +438,37 @@ for(let i = 0; i < 5; i++) {
         console.log('内层循环：' + j);
     }
 }
+
+// 题
+for (var i = 0; i < 10; i++) {
+  if (i >= 2) {
+    i +=2;
+    continue;
+  }
+  
+  if (i >= 6) {
+    i--;
+    break;
+  }
+  
+  i++;
+  console.log(i); // 1
+}
+console.log(i); // 11
+
 ```
 
 never-ending，loop 无限循环（死循环）。
 
 ### 函数
 
-特点：高内聚，低耦合。
+#### 特点
 
-基本用法：简化代码。
+高内聚，低耦合。
+
+#### 基本用法
+
+简化代码。
 
 - 函数声明：function a() {}
 - 函数表达式 / 匿名函数表达式：let b = function() {}
@@ -349,6 +485,8 @@ function sum(a, b, c) {
 ​	// 形参与实参是映射关系。
 
 ​	sum.length: 形参长度。
+
+​    sum.name: 函数名。
 
 ​	arguments.length: 实参长度。
 
@@ -377,7 +515,7 @@ fun(mianji(10)); // 将 mianji(10) 的返回值作为参数传递进 fun() 里�
 
 JS 调用函数传递变量参数时，是值（基本值 或 引用值）的传递。
 
-函数的参数：
+#### 函数的参数
 
 - 如果是简单类型，会做一个值类型的数值副本传到函数内部。
 - 如果是引用类型，会将引用类型的地址值复制给参数。
@@ -396,6 +534,14 @@ function fn2(obj) {
 let obj = {name: 'Tom'}
 fn2(obj);
 ```
+
+#### 重载
+
+概念：
+
+在程序中可以定义相同名字，不同参数的形式是不同函数。函数在调用的时候，自动识别不同参数对应的函数，实现了相同函数名不同的函数调用
+
+JS 本身是没有重载的，但是可以通过 arguments 实现函数重载。
 
 ### 递归
 
@@ -503,6 +649,28 @@ myArr[1](); // 100
 
 myArr = null; // 让内部函数成为垃圾对象 --> 回收闭包
 ```
+
+```html
+<div desc="houdunren">在线学习</div>
+<div desc="hdcms">开源产品</div>
+
+<script>
+  const divs = document.querySelectorAll('div');
+  divs.forEach(item => {
+    const desc = item.getAttribute('desc');
+    
+    item.addEventListener('click', () => {
+      console.log(desc); // houdunren, hdcms
+      console.log(item); // null
+    });
+    
+    // 释放内存，让程序运行更快。如果不释放，item 会有很多 属性。并且由于闭包的作用，内存占用会越来越多。
+    item = null;
+  });
+</script>
+```
+
+
 
 闭包会导致原有作用域链不释放，造成内存泄露。内存会占用很多，就是另一个泄露。
 
@@ -732,8 +900,59 @@ Object.defineProperty(obj, 'a', {
   enumerable: true, // 当且仅当该属性的enumerable为true时，该属性才能够出现在对象的枚举属性中。默认为 false。
   value: 'aa', // 该属性对应的值。可以是任何有效的 JavaScript 值（数值，对象，函数等）。默认为 undefined。
   writable: true // 当且仅当该属性的writable为true时，value才能被赋值运算符改变。默认为 false。
+  
+  // 访问器描述符：数据描述符和访问器描述符不能同时使用。
+  get() {}, // 在读取属性时调用的函数，默认值为 undefined。
+  set() {}, // 在写入属性时调用的函数，默认值为 undefined。
 });
+
+// ----------------------------------------
+function foo() {}
+Object.defineProperty(foo.prototype, 'z', {
+  get: function() {return 1;},
+});
+
+let obj = new foo();
+
+// 当 obj 对象上没有 'z' 属性的时候，并且他的原型链查找的时候，发现有对应的 get 方法或者 set 方法的时候，那么当我们尝试去赋值的时候，实际上会走原型上的 get/set 方法。而不会按照给当前对象添加新属性的方式去处理。
+console.log(obj.z); // 1
+obj.z = 10;
+console.log(obj.z); // still 1
+
+// 给 obj 添加属性
+Object.defineProperty(obj, 'z', {
+  value: 100,
+  configurable: true,
+});
+console.log(obj.z); // 100
+delete obj.z; // true
+console.log(obj.z); // back to 1
+
+// ----------------------------------------
+let o = {};
+Object.defineProperty(o, 'x', {value: 1});
+let obj2 = Object.create(o);
+
+console.log(obj2.x); // 1
+obj2.x = 200;
+console.log(obj2.x);// still 1, can't change it
+
+// 给 obj2 添加属性（覆盖原型链上 不可写的 'x'）
+Object.defineProperty(obj2, 'x', {
+  value: 100,
+  writable: true,
+  configurable: true
+});
+console.log(obj2.x); // 100
+obj2.x = 500;
+console.log(obj2.x); // 500
 ```
+
+#### 禁止给对象添加属性
+
+Object.preventExtensions(); 使用该方法后，就不可以对 对象添加属性了。
+
+Object.isExtensible(); 该方法 检测是否 可以给 该对象继续添加属性。 false 不可以添加，true 可以添加。
 
 #### 包装类
 
@@ -774,6 +993,8 @@ console.log(str.length); // 4 等价于：new String(str).length 这是系统自
 
 定义：原型是 function  对象的一个属性，它定义了构造函数制造出的对象的公共祖先。通过该构造函数产生的对象，可以继承该原型的属性和方法。原型也是对象。
 
+JS通过原型继承。
+
 Person.prototype -- 原型
 
 Person.prototype = {} 是祖先。
@@ -796,6 +1017,8 @@ person1.constructor => 返回构造器，可以被更改。对象无法修改原
 1. 利用原型特点和概念，可以提取公有属性。
 2. 对象如何查看原型： 隐式属性 _ _proto_ _
 3. 对象如何查看对象的构造函数：constructor
+
+实例对象的隐式原型 = 构造函数的显式原型
 
 ```javascript
 Person.prototype.name = 'sky';
@@ -829,6 +1052,29 @@ Person.prototype = {
 };
 console.log(p2.name); // 'sky'
 ```
+
+#### Object.setPrototypeOf
+
+MDN：https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Object/setPrototypeOf
+
+设置原型。
+
+**Object.setPrototypeOf()** 方法设置一个指定的对象的原型 ( 即, 内部[[Prototype]]属性）到另一个对象或  [`null`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/null)。
+
+```javascript
+const a = {
+  name: '后盾人'
+};
+const b = {
+  url: 'houdunren.com'
+};
+Object.setPrototypeOf(a, b);
+console.log(a); // {name: '后盾人', __ptoto__: {url: 'houdunren.com'}}
+```
+
+#### Object.getPrototypeOf
+
+获取 一个对象的原型。
 
 #### 原型链
 
@@ -981,6 +1227,138 @@ sum.call({
 }, 2, 3); // {a: 2, b：3}
 ```
 
+#### bind
+
+bind 返回的函数，没有 prototype 属性。
+
+bind 与 call 类似，但是 与call 不同的是 call 调用之后可以立即执行，但是 bind 需要用一个变量进行接收之后再执行。
+
+bind 方法跟 call 很像
+
+- 第一个参数标识执行时候的作用域
+- 从第二个参数开始，表示传递的参数
+
+bind 通过两项技术实现的
+
+- 函数的绑定。
+  - 函数作为参数传递的同时，可以存储函数的作用域。
+- 函数的柯理化。
+  - 一个接收多个参数的函数，我们可以一个一个的传递参数，当函数执行的时候，传递剩余的参数。
+  - 作用：增强函数的适用性。（类似于函数重载。重载是在函数内部实现，柯理化是在函数外部实现的。）
+
+学习视频地址：https://www.imooc.com/video/6431
+
+```javascript
+function myBind(fn, context) {
+  const args = [...arguments].slice(2);
+  
+  return function() {
+    const allArgs = [...args, ...arguments];
+    
+    return fn.apply(context, allArgs);
+  }
+}
+```
+
+
+
+```javascript
+// ----------- bind 方法与 this
+function f() {
+  return this.a;
+}
+
+let g = f.bind({a: 'test'});
+console.log(g()); // test
+console.log(g.prototype); // undefined
+
+let o = {a: 37, f: f, g: g};
+console.log(o.f(), o.g()); // 37, test
+
+// -----------------------
+const obj = {
+  title: '爱创课堂',
+};
+
+function demo() {
+  console.log(arguments, 111, this); // [1, 2, 3, 4, 5, 6], 111, {title: '爱创课堂'}
+  console.log(this.title);
+}
+
+// 改变作用域的时候，函数 不执行。
+const fn = demo.bind(obj, 1, 2, 3);
+
+fn(4, 5, 6);
+
+// ----------------------
+this.x = 9;
+let module = {
+  x: 81,
+  getX: function() {
+    return this.x;
+  }
+};
+
+module.getX(); // 81
+
+let getX = module.getX;
+getX(); // 9
+
+let boundGetX = getX.bind(module);
+boundGetX(); // 81
+
+// ------------ bind 与 currying (bind 与函数柯里化) -------
+function add(a, b, c) {
+  return a + b + c;
+}
+
+let func = add.bind(undefined, 100); // 100 赋值给了 a
+func(1, 2); // 103 这里 1 对应 b, 2 对应 c。
+
+let func2 = func.bind(undefined, 200); // 这里 200 绑定给了 b,(a在上一个已经绑定了 100)
+func2(10); // 310 这里 10 对应 c。
+
+// --------------- bind 与 currying 应用 ---------------
+function getConfig(colors, size, otherOptions) {
+  console.log(colors, size, otherOptions);
+}
+
+const defaultConfig = getConfig.bind(null, "#CC0000", "1024 * 768");
+
+defaultConfig("123"); // #CC0000 1024 * 768 123
+defaultConfig('456'); // #CC0000 1024 * 768 456
+
+// ------------- bind 与 new ---------
+function foo() {
+  this.b = 100;
+  return this.a;
+}
+
+let func = foo.bind({a: 1});
+
+func(); // 1
+new func(); // {b: 100}
+
+// ---------------------------------
+
+function hd(a, b) {
+  console.log(a, b);
+  return this.f + a + b;
+}
+
+let func = hd.bind({f: 1}, 1, 2);
+func() // 打印 1, 2 返回值是：4
+func(3, 4) //  打印 1, 2 返回值是：4。这时候再传参就没用了。
+
+let func2 = hd.bind({f: 1});
+func2(); // 打印 undefined, undefined，返回值是：NaN;
+func2(3, 4); // 打印 3, 4 返回值是：8。
+
+let func3 = hd.bind({f: 1}, 1);
+func3(); // 打印 1, undefined，返回值是：NaN;
+func3(3, 4); // 打印 1, 3 返回值是：5。
+```
+
 #### 继承发展史
 
 1. 传统形式：原型链。prototype。过多的继承了没用的属性。
@@ -1076,6 +1454,8 @@ for(let prop in obj) {
 
 A instanceof B // 返回值：true / false 判断 A 对象是不是 B 构造函数构造出来的，看 A 对象的原型链上有没有 B 的原型。
 
+A instanceOf B 大概的原理：它会判断左边的对象的原型链上是否有右边的构造函数的 prototype 属性 （适合检测自定义对象。）
+
 hasOwnProperty：是否是 对象自身属性
 
 区别数组和对象的方法：
@@ -1144,6 +1524,19 @@ function print() {
     }
 }
 print()(); // 'a', 'b'
+
+
+// ------------------------------
+let o = {
+  f: function() {
+    return this.a + this.b;
+  }
+};
+let p = Object.create(o);
+p.a = 1;
+p.b = 4;
+
+console.log(p.f()); // 5
 ```
 
 arguments.callee 指向函数自身的引用（严格模式无法使用）。
@@ -1229,6 +1622,145 @@ function deepClone(Origin, Target = {}) {
 }
 ```
 
+#### toString 和 valueOf
+
+```javascript
+let obj = {x: 1, y: 2};
+obj.toString(); // "[object Object]"
+obj.toString = function () {return this.x + this.y;};
+
+console.log("Result" + obj); // "Result 3", by toString
+console.log(+obj); // 3, from toString
+
+obj.valueOf = function () {return this.x + this.y + 100;};
+
+console.log(+obj); // 103, from valueOf
+
+// 把对象装换为基本类型，会先去找 valueOf，如果 valueOf 返回的值是基本类型的话，那么以 valueOf 返回的结果做值。如果不存在，或者返回的值是对象，然后去找 toString，如果 valueOf 和 toString 都没有，或者都返回了对象，那么就会报错。
+console.log("Result" + obj); // still "Result 103"
+
+// ------------------下面的会报错------
+// Cannot convert object to primitive value
+// 无法将对象转换为原始值。
+let obj = { x: 1, y: 2 };
+obj.toString(); // "[object Object]"
+obj.toString = function () {
+  // return this.x + this.y;
+  return {};
+};
+
+console.log("Result" + obj); // "Result 3", by toString
+console.log(+obj); // 3, from toString
+
+obj.valueOf = function () {
+  // return this.x + this.y + 100;
+  return {};
+};
+
+console.log(+obj); // 103, from valueOf
+console.log("Result" + obj); // still "Result 103"
+```
+
+#### 装箱 & 拆箱
+
+装箱：把基本数据类型转化为对应的引用数据类型的操作。
+
+```javascript
+const num = 123;
+const objNum = new Number(123);
+console.log(typeof objNum); // object
+```
+
+拆箱：将引用类型对象装换为对应的值类型对象。
+
+```javascript
+const objNum = new Number(123);
+const num2 = objNum.valueOf();
+console.log(num2, typeof num2); // 123, number
+```
+
+
+
+js 内部方法 toPrimitive(input, type)  input：传入的值 type: 值类型
+
+1. input 判断是不是原始类型的值，是 直接返回
+2. 如果不是原始类型，input.valueOf()  返回值 是原始类型，直接返回
+3. 还不是：input.toString() 返回 string 类型的值。
+4. 报错
+
+
+
+valueOf() : input 有没有 原始类型的值，有，返回原始类型的值，没有返回对象本身。
+
+toString(): input 字符串转换。对象：[object type] type: 对象类型。
+
+```javascript
+// 面试题
+console.log([] + []); // ''
+console.log([].valueOf()); // []
+console.log([].toString()); // ''
+
+console.log([] + {}); // "[object Object]"
+console.log({}.valueOf()); // {}
+console.log({}.toString()); // "[object Object]"
+
+console.log({} + []); // "[object Object]" 或 0, {} 被识别成 代码块了
+console.log(+ []); // 0
+console.log(+ ''); // 0
+```
+
+#### new
+
+四步：
+
+1. 创建一个新对象 obj
+2. 把 obj 的 proto 指向构造函数的 prototype 对象，实现继承
+3. 将步骤 1 新创建的对象 obj 作为 this 的上下文
+4. 返回创建的对象 obj （如果该函数没有返回对象，则返回 this。）
+
+```javascript
+// 1.
+const obj = new Object(); // {}
+
+// 2.
+obj.__proto__ = Fn.prototype;
+
+// 3.
+const result = Fn.call(obj);
+
+// 4.
+if (typeof result === 'object') {
+  return result; // func = result
+} else {
+  return obj; // func = obj
+}
+```
+
+#### EventListener
+
+地址：https://developer.mozilla.org/zh-CN/docs/Web/API/EventListener
+
+对象里的 特殊 方法 handleEvent：https://developer.mozilla.org/zh-CN/docs/Web/API/EventListener/handleEvent
+
+```html
+<div id="demo">这是DOM</div>
+
+<script>
+  const Dom = {
+    site: "后盾人",
+    handleEvent(event) {
+      console.log(this); // Dom 对象
+      console.log(event); // btn 对象的 event。
+    },
+    bind: function () {
+      const btn = document.querySelector("#demo");
+      btn.addEventListener("click", this);
+    },
+  };
+  Dom.bind();
+</script>
+```
+
 ### 数组
 
 #### 普通数组
@@ -1243,7 +1775,7 @@ arr[n] = 'abc'; 不会报错，会撑大数组。
 
 方法：
 
-1. 改变原数组：push, pop, shift, unshift, sort, reverse, splice, ...
+1. 改变原数组：push, pop, shift, unshift, sort, reverse, splice, copyWithin ...
 2. 不改变原数组：concat, join, slice, toString, ..
 
 ##### sort: 
@@ -1255,12 +1787,113 @@ sort 的参数可以接收一个函数，这个函数接收两个参数，排序
 3. 当为 0 时，位置不动。
 
 ```javascript
+// 实现一下 sort 方法。
+function sort(arr, callback) {
+  for (const n in arr) {
+    for (const m in arr) {
+      if (callback(arr[n], arr[m]) < 0) {
+        const temp = arr[n];
+        arr[n] = arr[m];
+        arr[m] = temp;
+      }
+    }
+  }
+	return arr;
+}
+
+let arr = [1, 2, 32, 5, 2, 9];
+
+arr = sort(arr, (a, b) => b - a);
+console.log(arr); // [32, 9, 5, 2, 2, 1]
+```
+
+
+
+```javascript
 // 使用 delete 删除
 let arr = [1, 2, 3];
 delete arr[0]; // 删除后数组的长度不变。
 console.log(arr); // [empty, 2, 3]
 console.log(arr[0]); // undefined
+
+let arr2 = [1, 2, 3, 4];
+delete arr2[2];
+console.log(arr2); // [1, 2, empty, 4]
+console.log(arr2.length); // 4
+console.log(2 in arr2); // false
+
+arr2[0] = undefined;
+console.log(arr2); // [undefined, 2, empty, 4]
+console.log(0 in arr2); // true
+
+arr2.length -= 1;
+console.log(arr2); // [undefined, 2, empty]
 ```
+
+
+
+```javascript
+const arr = [1, 2, 3, 1, 1];
+
+// reduce 做计数器。
+const count = arr.reduce((total, cur) => {
+  total += 1 === cur ? 1 : 0;
+  return total;
+}, 0);
+
+console.log(count); // 3  1 出现了 3次。
+
+// 求最大值
+const arr2 = [1, 2, 3, 5, 2, 88];
+
+const max = arr2.reduce((pre, cur) => {
+  return pre > cur ? pre : cur;
+});
+
+console.log(max); // 88
+```
+
+```javascript
+// reduce 的使用
+const arr = [
+  {
+    name: '张三',
+    age: 18
+  },
+   {
+    name: '李四',
+    age: 20
+  },
+];
+
+const res = arr.reduce((pre, cur, index) => {
+  Object.assign(pre, {
+    [cur.name + index]: cur
+  });
+  
+  return pre;
+}, {});
+
+console.log(JSON.stringify(res, null, 2));
+/*
+"{
+  "张三0": {
+    "name": "张三",
+    "age": 18
+  },
+  "李四1": {
+    "name": "李四",
+    "age": 20
+  }
+}"
+*/
+```
+
+
+
+#### 稀疏数组
+
+稀疏数组并不含有从 0 开始的连续索引。一般 length 属性值比实际元素个数大。
 
 #### 类数组
 
@@ -1386,6 +2019,22 @@ setInterval：排列机制是基于红黑树的，并不是按照时间准确执
 
 let timer = setTnterval(function() { }, 1000); // timer 是一个数字，且是唯一的，是这个定时器的 id。
 
+```javascript
+const date = new Date('1996-7-12 08:22:12');
+
+// 时间转换为 毫秒
+console.log(date * 1); // 837130932000
+console.log(Number(date)); // 837130932000
+console.log(date.valueOf()); // 837130932000
+console.log(date.getTime()); // 837130932000
+```
+
+### Math
+
+获取 [n, m] 之间的随机整数（包含 N 和 M）：Math.round(Math.random() * (m - n) + n)
+
+获取 [0, m] 之间的随机整数（包含 0 和 M）：Math.floor(Math.random() * (m + 1));
+
 ### JSON
 
 Json 是一种传输数据的格式（以对象为样板，本质上就是对象，但用途有区别，对象就是本地用的，json 是用来传输的）。
@@ -1394,11 +2043,62 @@ Json.parse(); => string --> json 接收
 
 Json.stringify(); => json --> string 发送
 
+
+
+JSON.stringify() 不会 序列化 undefined, function。NaN 和 Infinity 会转化为 null。正则会转化为 空对象 {}。
+
+- 第一个参数是要序列化的 对象
+- 第二个参数是 序列化后要保留的 key，
+- 制表符（缩进）
+
 ```json
 {
     "name": "sky",
     "age": 123
 }
+
+let obj3 = {v: undefined, a: NaN, b: true, c: 'cc', d: Infinity, e: new Date(), f: function () {}, g: /fd/g}
+console.log(JSON.stringify(obj3)); // "{"a":null,"b":true,"c":"cc","d":null,"e":"2021-02-16T09:43:28.741Z","g":{}}"
+
+// 定制 序列化过程
+let obj = {
+  x: 1,
+  y: 2,
+  o: {
+    o1: 1,
+    o2: 2,
+    toJSON: function () {
+      return this.o1 + this.o2;
+    }
+  }
+};
+console.log(JSON.stringify(obj)); // "{"x":1,"y":2,"o":3}"
+
+let obj6 = {
+  x: 1,
+  y: 2,
+  o: {
+    o1: 1,
+    o2: 2,
+    toJSON: function () {
+      return this.o1 + this.o2;
+    }
+  }, toJSON() {return this.x + this.y;},
+};
+console.log(JSON.stringify(obj6)); // "3"
+
+let obj7 = {
+  x: 1,
+  y: 2,
+  o: {
+    o1: 1,
+    o2: 2,
+    toJSON: function () {
+      return this.o1 + this.o2;
+    }
+  }, toJSON() {return {val: this.x + this.y, o: this.o}},
+};
+console.log(JSON.stringify(obj7)); // "{"val":3,"o":3}"
 ```
 
 传递给后端的是 JSON 字符串，
@@ -1527,22 +2227,6 @@ let regexp3 = new RegExp('abc', 'g');
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 ------
 
 
@@ -1553,12 +2237,18 @@ let regexp3 = new RegExp('abc', 'g');
 
 新增 Symbol 数据类型（基本类型），Symbol 类型的值是通过 Symbol 函数调用生成的，相同 Symbol 函数返回的值是唯一的。
 
+symbol 数据 不能运算 和 对比。
+
 ```javascript
 let sy1 = Symbol('hell');
 let sy2 = Symbol('hell');
 console.log(sy1); // Symbol(hell)
 console.log(typeof sy1); // symbol
 console.log(sy1 === sy2); // false
+
+let s2 = Symbol.for('ss');
+let s3 = Symbol.for('ss');
+console.log(s2 === s3); // true
 ```
 
 如果 symbol 作为对象的 key，则该key for...in 遍历时，遍历不出来。
@@ -1566,8 +2256,6 @@ console.log(sy1 === sy2); // false
 作用：
 
 1. 属性私有化 - 数据保护
-
-
 
 ```javascript
 let Person = (function() {
@@ -1668,9 +2356,21 @@ let obj3 = {
 };
 
 console.log(obj3); // { name: '小明', age: 18, mail: '男' }
+
+// 字符串也可以使用（字符串可以被迭代）
+const [...strArr] = 'hdcms';
+console.log(strArr); // ["h", "d", "c", "m", "s"]
 ```
 
 ### 模板字符串
+
+##### 优点：
+
+- 更标准的字符串，更好的处理了字符串拼接的问题。
+- 语义化更好
+- 防止注入 XSS
+
+
 
 * 新增模板字符串 `` 反引号
 
@@ -1692,7 +2392,35 @@ console.log(obj3); // { name: '小明', age: 18, mail: '男' }
 
     对象的属性名可以接收表达式做为 key，表达式计算的结果做为最终的 key。
 
+```javascript
+// 标签模板，标签 函数。
+console.log`123`; // 123
+console.log`12${3}`; // ["12", "", raw: Array(2)] 3
+console.log(parseInt`12${3}`); // 5 => console.log(parseInt(['12', ''], 3));
+
+// 按照模板分开，['12', '4']
+// 有几个模板，就把这几个模板中的值做成参数。
+console.log`12${3}4`; // ["12", "4", raw: Array(2)] 3
+
+alert`hello`; // 弹出 'hello'
+```
+
+
+
 ### 迭代
+
+原生具备 iterator 接口的数据（可用 for of 遍历）：
+
+Array, Arguments, Set, Map, String, TypedArray, NodeList。
+
+##### 工作原理
+
+1.  创建一个指针对象，指向当前数据结构的起始位置。
+2. 第一次调用对象的 next 方法，指针自动指向数据结构的第一个成员。
+3. 接下来不断调用 next 方法，指针一直往后移动，直到指向最后一个成员。
+4. 每调用 next 方法返回一个包含 value 和 done 属性的对象。 注：需要自定义遍历数据的时候，要想到迭代器。
+
+
 
 * 迭代协议：规定了迭代与实现的逻辑
 
@@ -1789,6 +2517,24 @@ console.log(arr4);
 console.log(Object.isFrozen(arr4));
 ```
 
+### 数组扩展
+
+Array.of 加强的 Array 构造函数，统一返回由参数构成的数组。
+
+Array.from 将类数组转化成数组。如：arguments、NodeList
+
+```javascript
+console.log(Array.of(9)); // [9]
+console.log(Array.of('6')); // ['6']
+console.log(Array.of(9, 1, '3')); // [9, 1, '3']
+
+console.log([1,2, NaN].indexOf(NaN)); // -1
+console.log([1,2].includes(NaN)); // true
+
+console.log([1,2, NaN].find(ele => Object.is(ele, NaN))); // NaN
+console.log([1,2, NaN].findIndex(ele => Object.is(ele, NaN))); // 2
+```
+
 ### 函数扩展
 
 1. 函数参数默认值
@@ -1840,14 +2586,122 @@ console.log(Object.isFrozen(arr4));
     console.log(arr3); // [1, 2, 3, 'a', 'b', 'c']
     ```
 
+### 标签函数
+
+```javascript
+function fn(args) {
+  console.log(args); // ['aa', raw:['aa']]
+	return 1;
+}
+
+console.log(fn`aa`); // 1
+
+console.log`123`; // 123
+console.log`12${3}`; // ["12", "", raw: Array(2)] 3
+console.log(parseInt`12${3}`); // 5 => console.log(parseInt(['12', ''], 3));
+console.log`12${3}4`; // ["12", "4", raw: Array(2)] 3
+alert`hello`; // 弹出 'hello'
+```
+
 ### 箭头函数使用函数表达式
 
 注意事项：
 
 * 内部 this 对象指向创建初期上下文对象。箭头函数的 this 在函数创建期间就绑定好了，箭头函数的 this 指向 创建该箭头函数所在的作用域对象 (this)
-* 不能作为构造函数
-* 没有 arguments
+* ES6 箭头函数的 this 是静态的，无论是什么方式（包括 call, apply）调用，this 始终都是指向定义时的，不会改变。
+* 不能作为构造函数。并且没有 prototype
+* 没有 arguments。内部 arguments this 由 定义时外围最接近一层的非箭头函数的 arguments 和 this 决定其值。
 * 不能作为生成器函数
+* 箭头函数不适合与 this 有关的回调，事件回调，对象的方法。
+
+```javascript
+function func(x) {
+  return function (y) {
+    return x + y;
+  }
+}
+
+// 等价于
+const func = x => y => x + y;
+```
+
+### Proxy 代理
+
+扩展对象的一些功能
+
+```javascript
+let obj = {
+  name: 'Strive',
+};
+
+let newObj = new Proxy(obj, {
+  get(target, property) {
+    // ToDo
+    console.log(target, property); // {name: 'Strive'}, "name"
+    
+    return target[property];
+  },
+  set(target, prop, value) {
+    
+  },
+  deleteProperty(target, property) {
+    
+  },
+  has(target, property) {
+    
+  },
+  ...
+});
+
+console.log(newObj.name); // 'Strive'
+```
+
+### Reflect 反射
+
+```javascript
+function show(...args) {
+  console.log(this); // String {"aaa"}
+  console.log(args); // [1, 2, 3, 4]
+}
+
+Reflect.apply(show, 'aaa', [1, 2, 3, 4]);
+```
+
+### Proxy & Reflect
+
+简介：植入代理模式的思想，以简洁易懂的方式控制对外部对象的访问。
+
+总结：利用内置的 set、get方法控制属性的读写功能用处较大，其余 has deleProperty... 等方法不太在工作开发中使用。
+
+```javascript
+const oData2 = {
+  value: "duyi",
+  _val: "aaa",
+};
+
+function upData() {
+  console.log("更新");
+}
+
+const oProxyData = new Proxy(oData2, {
+  set(target, key, value, receiver) {
+    Reflect.set(target, key, value);
+    update();
+  },
+  get(target, key, receiver) {
+    return Reflect.get(target, key);
+  },
+  has(target, key) {
+    console.log(target, key);
+    return key.indexOf("_") != -1 ? false : key in target;
+  },
+  deleteProperty() {},
+});
+
+console.log("_val" in oProxyData);
+```
+
+
 
 ### 内置对象
 
@@ -1871,6 +2725,14 @@ p1.toString(); // '[object Promise]'
 - unresolved 等待任务完成（pending）
 - resolved 任务完成，并且没有任何问题
 - rejected 任务完成，但是出现问题
+
+
+
+- pending 【待定】初始状态
+- fulfilled 【实现】操作成功
+- rejected 【被否决】操作失败
+
+Promise 状态发生改变，就会触发 .then() 里的响应函数处理后续步骤。
 
 
 
@@ -1899,6 +2761,59 @@ Promise.prototype.catch()
 Promise.resolve(); // 立刻返回 成功的 promise 对象。
 Promise.reject(); // 立刻返回 失败的 promise 对象。
 ```
+
+```javascript
+// promise 作为队列的重要特性
+console.log('start');
+
+let promise = new Promise(resolve => {
+  setTimeout(() => {
+    console.log('the promise fulfilled');
+    resolve('hello');
+  }, 1000);
+});
+
+setTimeout(() => {
+  promise.then(value => {
+    console.log(value); // 立即输出 start, 1s后 the promise fulfilled，2s后 hello
+  });
+}, 3000);
+
+// promise .then 里没有返回 promise 实例，那么他会默认执行下一个环节。
+console.log('here we go');
+
+new Promise(resolve => {
+  setTimeout(() => {
+    resolve('hello');
+  }, 2000);
+}).then(value => {
+  console.log(value);
+  console.log('everyone');
+  (function() {
+    return new Promise(resolve => {
+      setTimeout(() => {
+        console.log('Mr.L');
+        resolve('Marry Xmas');
+      }, 2000);
+    });
+  }());
+  return false; // 不返回会输出 undefined 'world'
+}).then(value => {
+  console.log(value + ' world');
+});
+// 输出顺序：here we go, hello, everyone, false 'world', Mr.L
+```
+
+#### .then()
+
+- .then() 接受两个函数作为参数，分别代表 fulfilled 和 rejected
+- .then() 返回一个新的 Promise 实例，所以它可以链式调用
+- 当 前面的 Promise 状态改变时，.then() 根据其最终状态，选中待定的状态响应函数执行。
+- 状态响应函数可以返回新的 Promise，或其它值。
+- 如果返回新的 Promise，那么下一级 .then() 会在新 Promise 状态改变之后执行。
+- 如果返回其它任何值，则会立刻执行下一级 .then()
+
+
 
 #### 没有解决的问题
 
@@ -1994,9 +2909,13 @@ Promise.race();
 
   但是只要有一个失败，立马执行 catch 方法，返回错误的那个对象。
 
+  promise.all 可以将多个 Promise 实例包装成一个新的 Promise 实例。同时，成功和失败的返回值是不同的，成功的时候返回的是一个结果数组，而失败的时候则返回最先被 reject 失败状态的值。
+
 * Promise.race([p1, p2])
 
   只要有一个请求返回时，就会立马执行 then 或者 catch 方法， 成功 执行 then 方法，失败执行 catch 方法。
+  
+  race 赛跑的意思，意思就是说，Promise.race([p1, p2, p3]) 里面哪个结果获得的快，就返回那个结果，不管结果本身是成功状态还是失败状态。
 
 #### 例子
 
@@ -2151,6 +3070,73 @@ function co(callback) {
 co(fn);
 ```
 
+```javascript
+// 结合 iterator 协议和 generator
+const obj = {
+  0: 'a',
+  1: 'b',
+  2: 'c',
+  length: 3,
+  [Symbol.iterator]: function *() {
+    let currentIndex = 0;
+    while(currentIndex != this.length) {
+      yield this[currentIndex];
+      currentIndex++;
+    }
+  }
+};
+
+console.log([...obj]); // ['a', 'b', 'c']
+for (let key of obj) {
+  console.log(key); // 'a', 'b', 'c'
+}
+```
+
+### Promise 化
+
+```javascript
+const fs = require('fs');
+
+function promisify(func) {
+  return function(...arg) {
+    return new Promise((res, rej) => {
+      func(...arg, (err, data) => {
+        if (err) {
+          rej(err);
+        } else {
+          res(data);
+        }
+      })
+    });
+  }
+}
+
+// promise 化异步操作
+let readFile = promisify(fs.readFile);
+let writeFile = promisify(fs.writeFile);
+
+readFile('./data/number.txt', 'utf-8').then(val => {
+  console.log(val);
+});
+
+// -----------------------------
+// 把 fs 对象上的 所有方法都 添加一个 异步的 promise 方法（官方自带了）。
+function promisifyAll(obj) {
+  for (let key in obj) {
+    const fn = obj[key];
+    if (typeof fn === 'function') {
+      obj[key + 'Async'] = promisify(fn);
+    }
+  }
+}
+
+promisifyAll(fs);
+
+fs.readFileAsync('./data/number.txt', 'utf-8').then(val => {
+  console.log(val);
+});
+```
+
 
 
 ### async & await
@@ -2158,6 +3144,8 @@ co(fn);
 把异步的写法变成了同步的写法，但是本质还是异步编程。
 
 await 后边跟的是 一个 promise 对象。
+
+async 函数返回值 是一个 Promise 对象。
 
 ```javascript
 const p1 = new Promise((resolve, reject) => {
@@ -2296,7 +3284,41 @@ onmessage = event => {
 
 ------
 
+## BOM
 
+归纳：
+
+Window JavaScript 层级中的顶层对象表示浏览器窗口
+
+Navigator 包含客户端浏览器的信息
+
+History 包含了浏览器窗口访问的 URL
+
+Location 包含了当前 URL 的信息
+
+Screen 包含客户端显示屏的信息
+
+
+
+------
+
+## 浏览器基本组成
+
+1. 用户界面
+2. 浏览器引擎
+3. 渲染引擎
+4. 网络
+5. UI 后端
+6. JS引擎
+7. 数据存储
+
+
+
+#### 渲染过程
+
+解析 html 从而构建 DOM 树 ==> CSS Rule 树 ==> 构建 Render 树 ==> 布局 Render 树 ==> 绘制 Render 树
+
+------
 
 # JS面试题
 
@@ -2327,7 +3349,7 @@ let c = fun(0).fun(1); c.fun(2); c.fun(3); // undefined, 0, 1, 1
 // 
 let x = 10;
 function fn() {
-    console.log(x); // 10
+    console.log(x); // 10，作用域跟 生成时有关，跟执行时无关。
 }
 function show(f) {
     let x = 20;
@@ -2335,9 +3357,114 @@ function show(f) {
 }
 show(fn);
 
+// ------------------------------------------------------
+const buttons = [{name: 'b1'}, {name: 'b2'}, {name: 'b3'}];
+
+function bind() {
+  for (var i = 0; i < buttons.length; i++) {
+    buttons[i].fun = function() {
+      console.log(i); // 这里也有闭包的知识。
+    }
+  }
+}
+
+bind();
+
+buttons[0].fun(); // 3
+buttons[1].fun(); // 3
+buttons[2].fun(); // 3
+
 ```
 
 
 
 ------
+
+
+
+# 其它知识
+
+#### reflow（回流）& repaint（重绘）
+
+reflow：当元素属性发生改变且影响布局时（宽度、高度、内外边距等），产生回流，相当于刷新页面。
+
+repaint：当元素属性发生改变且不影响布局时（背景颜色、透明度、字体样式等），产生重绘，相当于不刷新页面，动态更新内容。
+
+重绘不一定引起回流，回流必将引起重绘。
+
+#### html 事件 & DOM 0级事件 & DOM 2级事件
+
+事件监听的优点：可以绑定多个事件，常规的事件绑定只执行最后绑定的事件
+
+原因：js 不支持事件重载，绑定事件相当于一个变量存储的是函数的地址，如果再绑定一个事件，相当于变量指向另一个函数的地址，事件监听相当于订阅发布者，改变了数据，触发了事件，订阅这个事件的函数被执行。
+
+```html
+<input type="button" value="html事件点击" onclick="func()" />
+<input type="button" value="dom0级事件" id="btn" />
+<input type="button" value="dom2级事件" id="btn1" />
+
+<script>
+	// 1. html 事件。事件调用直接写在 html 中的。
+  function fun() {
+    alert('hello');
+  }
+  
+  // 2. dom 0级事件：事件绑定。（只能绑定一次，只会执行最后一次的绑定）
+  document.getElementById('btn').onclick = function() {
+    alert('world');
+  }
+  
+  // 3. dom 2级事件：事件监听。（可以多次绑定，每次绑定都会执行。）
+  /*
+  * element.addEventListener(event, function, useCapture) removeEventListener
+  * evnet:（必需）事件名，支持所有 DOM事件。
+  * function:（必需）指定要事件触发时执行的函数。
+  * useCapture:（可选）指定事件是否在捕获或冒泡阶段执行。true：捕获。false：冒泡。默认 false。
+  * IE8: element.attachEvent(event, function)
+  * event:（必需）事件类型。需加 "on"，例如：onclick。
+  * function:（必需）指定要事件触发时执行的函数。
+  *
+  */
+  document.getElementById('btn1').addEventListener('click', fun2);
+  function fun2() {
+    alert('hello world');
+  }
+</script>
+```
+
+
+
+#### 事件冒泡 & 事件委托 & 阻止默认行为
+
+阻止事件冒泡：e.stopPropagation() （IE: e.cancelBubble = true）
+
+事件委托：利用了 事件冒泡。
+
+```html
+<ul id="demo2">
+  <li>123</li>
+  <li>456</li>
+  <li>789</li>
+</ul>
+
+<script>
+  // 利用事件冒泡，把 li 点击事件委托给了 父级 的 ul。
+  const obj2 = document.getElementById('demo2');
+  obj2.addEventListener('click', function(e) {
+    const e = e || window.event; // IE8: window.event arguments[0]
+    if(e.target.nodeName.toLowerCase() === 'li') { // IE8: e.srcElement
+      alert(e.target.innerHTML);
+    }
+  }, false);
+</script>
+```
+
+
+
+阻止默认行为的两种方式：
+
+- e.preventDefault();
+- return false 可以阻止默认行为，但是后面的代码不再执行，而且只限于传统事件注册方式。
+
+
 
