@@ -151,6 +151,16 @@ instanceof 检测的主要是原型。基于原型链。
 
 typeof Array => 'function'
 
+
+
+小结
+
+typeof 适合基本类型及 function 检测，遇到 null 失效。
+
+[[Class]] 通过 {}.toString 拿到，适合内置对象和基元类型，遇到 null 和 undefined 失效。
+
+instanceof 适合自定义对象，也可以用来检测原生对象，在不同 iframe 和 window 间检测时失效。
+
 #### 内存管理
 
 内存生命周期：
@@ -1361,6 +1371,10 @@ func3(3, 4); // 打印 1, 3 返回值是：5。
 
 #### 继承发展史
 
+原型的继承，而不是改变构造函数的原型。https://www.bilibili.com/video/BV1NJ411W7wh?p=214
+
+继承，是原型的继承。
+
 1. 传统形式：原型链。prototype。过多的继承了没用的属性。
 2. 借用构造函数。call() / apply()。不能继承借用构造函数的原型，每次构造函数都要多走一个函数。
 3. 共享原型。不能随便改动自己的原型。=> Son.prototype = Father.prototype
@@ -1457,6 +1471,8 @@ A instanceof B // 返回值：true / false 判断 A 对象是不是 B 构造函�
 A instanceOf B 大概的原理：它会判断左边的对象的原型链上是否有右边的构造函数的 prototype 属性 （适合检测自定义对象。）
 
 hasOwnProperty：是否是 对象自身属性
+
+isPrototypeOf：于测试一个对象是否存在于另一个对象的原型链上。
 
 区别数组和对象的方法：
 
@@ -1761,6 +1777,43 @@ if (typeof result === 'object') {
 </script>
 ```
 
+#### proto
+
+```javascript
+const hd = {
+  name: '后盾人',
+};
+
+// __proto__ 是一个 get 或者 set
+
+hd.__proto__ = {
+  show() {
+    console.log(this.name);
+  }
+};
+
+hd.show(); // '后盾人'
+
+hd.__proto__ = 99; // 赋值原始值，不会改变。
+
+hd.show(); // '后盾人'
+
+hd.__proto__ = {};
+
+hd.show(); // Uncaught TypeError: hd.show is not a function
+
+hd.__proto__ = null; // 设置完之后 hd 就没有原型了。相当于 Object.create(null)
+
+hd.show(); // VM1182:1 Uncaught TypeError: hd.show is not a function
+
+hd.toString(); // VM1262:1 Uncaught TypeError: hd.toString is not a function
+
+hd.__proto__ = {a: 3}; // hd 没有原型后，可以给 他一个 显示的 __proto__ 属性。
+
+console.log(hd.a); // undefined
+console.log(hd.__proto__.a); // 3
+```
+
 ### 数组
 
 #### 普通数组
@@ -1894,6 +1947,26 @@ console.log(JSON.stringify(res, null, 2));
 #### 稀疏数组
 
 稀疏数组并不含有从 0 开始的连续索引。一般 length 属性值比实际元素个数大。
+
+```javascript
+const arr1 = [undefined];
+const arr2 = new Array(1);
+
+0 in arr1; // true
+0 in arr2; // false
+
+arr1.length = 100;
+arr1[99] = 123;
+
+99 in arr1; true
+98 in arr1; false
+
+const arr3 = [,,];
+0 in arr3; // false
+console.log(arr3); // [empty * 2]
+```
+
+
 
 #### 类数组
 
