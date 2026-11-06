@@ -45,6 +45,8 @@ Redis 是一个 key-value 的数据库，key 一般是 String 类型，不过 va
 
 ### 通用命令
 
+Redis 命令不区分大小写。
+
 通用指令是不分数据类型的，都可以使用的指令，常见的有
 
 KEYS：查看符合模板的所有 key，**不建议在生产环境设备上使用** (可以在从节点使用)
@@ -59,9 +61,11 @@ TTL：查看一个 key 的剩余有效期
 
 PERSIST KEY：取消 key 过期时间
 
+TYPE key：查看 key 的类型 `TYPE s1`
+
 SELECT INDEX：切换数据库，默认是第 0 个,共有[0, 15] 个 `SELECT 0`
 
-MOVE key db：从当前数据库将 key 移动到指定 db 库
+MOVE key db：从当前数据库将 key 移动到指定 db 库 `MOVE N2 1`
 
 RANDOMKEY：随机返回一个 key
 
@@ -137,9 +141,14 @@ String 类型的常见命令有
 - INCR：让一个整型的 key 自增1
 - DECR：让一个整型的 key 自减 1
 - INCRBY：让一个整型的 key 自增并指定步长，例如：`incrby num 2` 让 num 值自增2  (只能操作整型)
+- DECRBY key decrement：让一个整型的 key 自减并指定步长 `DECRBY N1 5`
 - INCRBYFLOAT：让一个浮点类型的数字自增并指定步长 (也可以操作整型)
-- SETNX：添加一个 String 类型的键值对，前提是这个 key 不存在，否则不执行
-- SETEX：添加一个 String 类型的键值对，并且指定有效期
+- SETNX：添加一个 String 类型的键值对，前提是这个 key 不存在，否则不执行 `SETNX k3 valuek3`
+- SETEX：添加一个 String 类型的键值对，并且指定有效期 `SETEX k3 30 valuk3`
+- APPEND key value：在 key 原来的值后边追加 value。如果 key 不存在则在 db 里新增一个 key。
+- STRLEN key：获取 key 的 value 的长度
+- GETRANGE key start end：获取 key 的部分值 `GETRANGE k11 1 3`, start 从 0 开始。`GETRANGE k11 0 -1`获取全部字符串
+- GETSET key value：如果 key 存在则返回 key 原来的值 然后设置 key 的值为 value，如果不存在则返回 nil 然后设置 key 的值为 value
 
 ```shell
 SET k1 v1
@@ -152,14 +161,16 @@ MGET S1 S2 S3
 
 SET N1 100
 
+# 只能每次加 1，返回值：自增后的新值
 INCR N1
 
+# 返回值：自增后的新值
 INCRBY N1 10
 
 # 做自减 (常用)
 INCRBY N1 -2
 
-# 自减 1
+# 自减 1 (只能每次减 1) 返回值：自减后的新值
 DECR N1
 
 SET N2 66.5
@@ -173,6 +184,21 @@ SETNX k6 v6
 
 # 10：10秒有效期 (等价于 SET k7 v7 EX 10)
 SETEX k7 10 v7
+
+# 返回新字符串的长度 6
+APPEND k1 vvv1
+
+# 新增 k11
+APPEND k11 vvv1
+
+# 6
+STRLEN k1
+
+# 返回 nil
+GETSET k33 valuek3-3
+
+# 返回 valuek3-3
+GETSET k33 valuek333
 ```
 
 ##### key 格式
@@ -313,8 +339,10 @@ List 的常见命令有
 - RPOP key：移除并返回列表右侧的第一个元素
 - LLEN key：获取列表长度
 - LINDEX key index：操作 key 集合，获取 索引为 index 位置的数据
-- LRANGE key star end：返回一段角标范围内的所有元素 (角标从 0 开始计数)
+- LRANGE key star end：返回一段角标范围内的所有元素 (角标从 0 开始计数) (不会删除数据)
 - BLPOP 和 BRPOP：与 LPOP 和 RPOP 类似，只不过在没有元素时等待指定时间，而不是直接返回 nil
+- LREM key count element：从 key 中移除 count 个 element 值。`LREM users 1 7`
+- LTRIM key start stop：从 start 开始 移除到 stop. `LTRIM users 2 4`
 
 ```shell
 # 按顺序推进去，1 最先推进去，3 在最左侧
@@ -389,6 +417,8 @@ Set 的常见命令有
 - SISMEMBER key member：判断一个元素是否存在于 set 中
 - SMEMBERS key：获取 set 中的所有元素
 - SPOP key count：从 key 集合中随机弹出 count 个元素
+- SRANDMEMBER key count： 从 key 集合中返回 count 个元素 (不会删除元素，默认 count = 1)
+- SMOVE key1 key2 value：将一个指定的值，移动到另外一个 set 集合。
 - SINTER key1 key2 ...：求 key1 和 key2 的交集
 - SDIFF key1 key2 ...：求 key1 和 key2 的差集 (返回的事 key1 独有的)
 - SUNION key1 key2 ...：求 key1 和 key2 的并集
@@ -582,9 +612,11 @@ Redis key 一定要设置过期时间。需要根据业务场景，对 key 设�
 
 ### 事务
 
-单个 Redis 命令的执行是原子性的，但 Redis 没有在事务上增加任何维持原子性的机制，所以 Redis 事务的执行并不是原子性的。
+单个 Redis 命令的执行是原子性的，但 Redis 没有在事务上增加任何维持原子性的机制，所以 Redis 事务的执行并不是原子性的，不能保证原子性。
 
 Redis 事务可以理解为一个**打包的批量执行脚本**，但批量指令并非原子化的操作，中间某条指令的失败不会导致前面已经做完的指令回滚，也不会造成后续的指令不做。
+
+Redis 事务没有隔离级别的概念。
 
 Redis 事务可以一次执行多个命令，并且带有以下三个重要的保证
 
@@ -592,84 +624,57 @@ Redis 事务可以一次执行多个命令，并且带有以下三个重要的�
 - 收到 EXEC 命令后进入事务执行，事务中任意命令执行失败，其余的命令依然被执行。
 - 在事务执行过程，其他客户端提交的命令请求不会插入到事务执行命令序列中。
 
+### 内存淘汰机制
 
+Redis 内存淘汰机制也可以称之为 key 内卷机制，当资源不足时，该如何选择？
 
+##### 分类
 
+常见的内存淘汰机制分为四大类
 
+- **LRU**：LRU 是 Least recently used，最近最少使用的意思。简单的理解就是从数据库中删除最近最少访问的数据，该算法认为，你长期不用的数据，那么被再次访问的概率也就很小了，淘汰的数据为最长时间没有被使用，仅与时间相关。
+- **LFU**：LFU 是 Least Frequently Used，最不经常使用的意思，简单的理解就是淘汰一段时间内，使用次数最少的数据，这个与频次和时间相关。
+- **TTL**：Redis 中，有的数据是设置了过期时间的，而设置了过期时间的这部分数据，就是该算法要解决的对象。如果 key 快过期了，但是现在内存不够了，会把这个 key 提前干掉。
+- **随机淘汰**：随机挑选一个 key 被干掉。
 
+##### Redis 淘汰策略
 
+Redis 通过配置 `maxmemroy-policy` 来配置指定具体的淘汰机制，可供选择的值有
 
+- `volatile-lru` --> 找出已经设置过期时间的数据集，将最近最少使用的数据干掉。
+- `volatile-ttl` --> 找出已经设置过期时间的数据集，将即将过期的数据干掉。
+- `volatile-random` --> 找出已经设置过期时间的数据集，进行无差别攻击，随机干掉数据。
+- `volatile-lfu` --> 找出已经设置过期时间的数据集，将一段时间内，使用次数最少的数据干掉。
+- `allkeys-lru` --> 与第1个差不多，数据集从过期时间数据变为全体数据。
+- `allkeys-lfu` --> 与第4个差不多，数据集从设置过期时间数据边为全体数据。
+- `allkeys-random` --> 与第3个差不多，数据集从设置过期时间数据变为全体数据。
+- `no-enviction` --> 什么都不干，报错，告诉你内存不足，这样的好处是可以保证数据不丢失。
 
+**系统默认选择：noenviction**
 
+##### 过期 key 处理
 
+Redis 的 key 过期了，该如何清理？
 
+Redis 给出了三种方案
 
+- **惰性删除**：当访问 key 时，才去判断它是否过期，如果过期，直接干掉。这种方式对 CPU 很友好，但是一个 key 如果长期不用，一直存在内存里，会造成内存浪费。
+- **定时删除**：设置键的过期时间的同时，创建一个定时器，当到达过期时间点，立即执行对 key 的删除操作，这种方式对 CPU 不友好，得额外让 CPU 维护定时器。
+- **定期删除**：隔一段时间，对数据进行一次检查，删除里面的过期 key，至于要删除多少过期 key，检查多少数据，则由算法决定。
 
+Redis **服务器实际使用的是惰性删除和定期删除两种策略**：通过配合使用这两种删除策略，可以很好地在合理使用 CPU 和避免浪费内存之间取得平衡。
 
+### 锁
 
+**悲观锁**
 
+很悲观，无论做什么都会加锁。
 
+**乐观锁**
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+- 很乐观，认为什么时候都不会出错，所以不会加锁。更新数据时去判断一下，在此期间是否有人修改过这个数据。
+- 获取 version
+- 更新的时候比较 version
 
 
 ---
