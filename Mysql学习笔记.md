@@ -249,6 +249,9 @@ CREATE DATABASE IF NOT EXISTS itcast4 CHARACTER SET utf8mb4; -- 推荐
 
 -- 8.0+ 后 utf8mb4 是默认支持的，所以可以使用简写
 CREATE DATABASE if NOT EXISTS itcast5;
+
+-- 数据库名推荐使用 _ ，不能使用 - ，- 需要使用 `nest-project-demo1` 包裹。
+CREATE DATABASE nest_project_demo1 CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;
 ```
 
 ###### 查看数据库的创建详细信息
