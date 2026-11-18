@@ -1575,6 +1575,17 @@ INSERT INTO grades VALUES (101, 1, 59); -- 报错 Duplicate entry '101-1' for ke
 --   [CONSTRAINT] [外键名称] FOREIGN KEY (外键字段名) REFERENCES 主表 (主表列名)
 -- );
 
+CREATE TABLE logs (
+  id INT PRIMARY KEY AUTO_INCREMENT COMMENT 'id 主键',
+  path VARCHAR(100) COMMENT '请求路径',
+  method VARCHAR(10) NOT NULL COMMENT '请求方法',
+  data TEXT NOT NULL COMMENT '请求数据',
+  result TEXT NOT NULL COMMENT '请求结果',
+  userId INT COMMENT '用户id',
+  FOREIGN KEY (userId) REFERENCES users(id) ON DELETE CASCADE, -- 👈 修正了拼写，补上了逗号
+  INDEX idx_userId (userId)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='请求日志表';
+
 -- 2. 修改表，增加外键
 
 -- ALTER TABLE 表名 ADD CONSTRAINT 外键名称 FOREIGN KEY (外键字段名) REFERENCES 主表 (主表列名);
